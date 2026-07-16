@@ -1,0 +1,9 @@
+[project]
+name = "creator-content-radar"
+version = "0.1.0"
+description = "AI-powered niche profiling and trending content radar for YouTube creators"
+requires-python = ">=3.11"
+dependencies = [
+    "python-dotenv>=1.0",
+    "pydantic-settings>=2.0",
+]
