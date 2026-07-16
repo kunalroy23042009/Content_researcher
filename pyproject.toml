@@ -1,9 +1,32 @@
 [project]
 name = "creator-content-radar"
 version = "0.1.0"
-description = "AI-powered niche profiling and trending content radar for YouTube creators"
+description = "AI-powered YouTube channel analyzer and cross-platform content discovery tool"
 requires-python = ">=3.11"
 dependencies = [
-    "python-dotenv>=1.0",
-    "pydantic-settings>=2.0",
+    "fastapi>=0.115.0",
+    "uvicorn[standard]>=0.32.0",
+    "google-api-python-client>=2.149.0",
+    "praw>=7.7.1",
+    "google-generativeai>=0.8.0",
+    "python-dotenv>=1.0.1",
+    "pydantic>=2.9.0",
+    "pydantic-settings>=2.6.0",
+    "httpx>=0.27.0",
+    "sqlmodel>=0.0.22",
 ]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=8.3.0",
+    "black>=24.10.0",
+    "ruff>=0.7.0",
+]
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.ruff]
+line-length = 100
+target-version = "py311"
