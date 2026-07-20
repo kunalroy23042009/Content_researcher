@@ -105,3 +105,56 @@ pytest --cov=app --cov-report=term-missing
 ## License
 
 MIT
+
+## Platform Coverage
+
+| Platform | Free option | Paid needed? |
+|----------|-------------|-------------|
+| YouTube | Yes (quota-limited) | No |
+| Reddit | Yes | No |
+| Google Trends | Yes | No |
+| Twitch | Yes | No |
+| Twitter/X | Very limited | Yes, for real use |
+| TikTok | Scraping only | Recommended (Apify etc.) |
+| Instagram | Scraping only | Recommended (Apify etc.) |
+
+## What Could Differentiate This Project
+
+- **Reddit community signal** — most competitors ignore Reddit. This is the biggest edge.
+- **"Underrated" classification** — finding low-competition opportunities, not just trending stuff.
+- **India-first / regional focus** — vidIQ and TubeBuddy are US-centric. Indian creators need Hinglish-aware, regional-language content analysis. This is a massive untapped market.
+- **Niche + channel combo** — analyzing a channel's niche AND cross-referencing it with what communities want = a unique workflow.
+
+## Roadmap: From Repo → SaaS Product
+
+### Phase 1: Ship the MVP (Weeks 1–4)
+- Implement `channel_analyzer.py` (YouTube API → Gemini profile)
+- Add `POST /analyze` endpoint
+- Build basic frontend (input → JSON results)
+- Deploy to Render free tier
+
+**Goal:** Paste a URL, get a niche profile. That's it.
+
+### Phase 2: Core Features (Weeks 5–10)
+- Implement `competitor_finder` + `topic_search` (YT + Reddit)
+- Build classifier (trending / popular / underrated)
+- Add `ai_reasoning` for content angle suggestions
+- Polished frontend with results dashboard
+
+**Goal:** The full V1 scope from `PROJECT_SCOPE.md`
+
+### Phase 3: Monetize (Weeks 11–16)
+- Add user auth (Google OAuth)
+- Rate limiting + usage tracking
+- Freemium pricing (3 free analyses → $9/mo → $29/mo)
+- Export reports as PDF / shareable links
+
+**Goal:** First paying users
+
+### Phase 4: Defend & Scale (Months 4–6)
+- Add X/Twitter + Google Trends integration
+- Scheduled weekly niche reports (email / SMS)
+- India-localized version (Hinglish, regional languages)
+- Browser extension (analyze any channel in 1 click)
+
+**Goal:** Differentiated moat + recurring revenue
