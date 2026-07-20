@@ -1,7 +1,7 @@
-"""Topic search — queries YouTube for content matching a given topic.
+"""Topic search — queries YouTube and Reddit for content matching a given topic.
 
-Phase 6 implementation.  Combines global and competitor-scoped YouTube search
-into a unified ``ContentResult`` feed.
+Combines global and competitor-scoped YouTube search plus Reddit subreddit
+search into a unified ``ContentResult`` feed.
 """
 
 from __future__ import annotations
@@ -114,6 +114,50 @@ def search_youtube(topic: str, competitor_channel_ids: list[str]) -> list[Conten
 
 
 # ---------------------------------------------------------------------------
+# Reddit
+# ---------------------------------------------------------------------------
+
+
+def search_reddit(topic: str, subreddits: list[str] | None = None) -> list[ContentResult]:
+    """Search Reddit for posts matching *topic* via PRAW.
+
+    Returns ContentResult objects with platform='reddit'.
+    Failures are logged and an empty list is returned (graceful degradation).
+    """
+    results: list[ContentResult] = []
+
+    try:
+        from app.services.reddit_client import RedditClient
+
+        reddit = RedditClient()
+        posts = reddit.search_subreddit(topic, subreddits=subreddits, limit=25)
+
+        for post in posts:
+            score = post.get("score", 0)
+            num_comments = post.get("num_comments", 0)
+            created = post.get("created_utc", datetime.now(timezone.utc))
+
+            results.append(
+                ContentResult(
+                    platform="reddit",
+                    title=post.get("title", ""),
+                    url=post.get("url", ""),
+                    engagement_score=float(score + num_comments * 3),
+                    published_at=created,
+                    source=f"r/{post.get('subreddit', 'unknown')}",
+                    raw_metrics={
+                        "upvotes": score,
+                        "comments": num_comments,
+                    },
+                )
+            )
+    except Exception as exc:
+        logger.warning("Reddit search failed (continuing with YouTube only): %s", exc)
+
+    return results
+
+
+# ---------------------------------------------------------------------------
 # Unified feed
 # ---------------------------------------------------------------------------
 
@@ -123,9 +167,9 @@ def search_topic(
     competitor_channel_ids: list[str],
     subreddits: list[str] | None = None,
 ) -> list[ContentResult]:
-    """Search YouTube for *topic* and return a result list.
+    """Search YouTube and Reddit for *topic* and return a unified result list.
 
-    Returns partial results if search fails or returns zero items.
+    Returns partial results if either platform fails (graceful degradation).
     This function does not use the cache — see ``search_topic_with_insights``.
     """
     results: list[ContentResult] = []
@@ -134,6 +178,11 @@ def search_topic(
         results.extend(search_youtube(topic, competitor_channel_ids))
     except Exception as exc:
         logger.warning("YouTube topic search failed: %s", exc)
+
+    try:
+        results.extend(search_reddit(topic, subreddits))
+    except Exception as exc:
+        logger.warning("Reddit topic search failed: %s", exc)
 
     return results
 

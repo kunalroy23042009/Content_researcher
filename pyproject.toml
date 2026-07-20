@@ -1,6 +1,6 @@
 [project]
 name = "creator-content-radar"
-version = "0.1.0"
+version = "0.2.0"
 description = "AI-powered YouTube channel analyzer and cross-platform content discovery tool"
 requires-python = ">=3.11"
 dependencies = [
@@ -10,16 +10,25 @@ dependencies = [
     "google-genai>=1.0.0",
     "groq>=0.11.0",
     "openai>=1.50.0",
+    "praw>=7.7.1",
     "python-dotenv>=1.0.1",
     "pydantic>=2.9.0",
     "pydantic-settings>=2.6.0",
+    "pydantic[email]>=2.9.0",
     "httpx>=0.27.0",
     "sqlmodel>=0.0.22",
+    "slowapi>=0.1.9",
+    "python-jose[cryptography]>=3.3.0",
+    "passlib[bcrypt]>=1.7.4",
+    "stripe>=8.0.0",
+    "prometheus-fastapi-instrumentator>=7.0.0",
 ]
 
 [project.optional-dependencies]
 dev = [
     "pytest>=8.3.0",
+    "pytest-asyncio>=0.24.0",
+    "pytest-cov>=5.0.0",
     "black>=24.10.0",
     "ruff>=0.7.0",
 ]
@@ -31,3 +40,6 @@ build-backend = "hatchling.build"
 [tool.ruff]
 line-length = 100
 target-version = "py311"
+
+[tool.pytest.ini_options]
+asyncio_mode = "auto"

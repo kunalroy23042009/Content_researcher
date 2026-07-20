@@ -1,7 +1,7 @@
-"""Database — SQLModel engine, tables, and caching for SQLite.
+"""Database — SQLModel engine, tables, and caching for SQLite/PostgreSQL.
 
-Phase 9 implementation.  Persists channel profiles and topic searches to
-``data/cache.db`` so repeated requests within 24 hours skip external APIs.
+Persists channel profiles, topic searches, users, and API keys.
+Supports SQLite for local dev and PostgreSQL for production.
 """
 
 from __future__ import annotations
@@ -13,6 +13,7 @@ from pathlib import Path
 
 from sqlmodel import Field, Session, SQLModel, create_engine, select
 
+from app.config import settings
 from app.models import ChannelProfile, ContentResult, TopicInsight
 
 logger = logging.getLogger(__name__)
@@ -57,6 +58,28 @@ class TopicSearch(SQLModel, table=True):
     searched_at: datetime
 
 
+class User(SQLModel, table=True):
+    """Registered user for the SaaS."""
+
+    id: int | None = Field(default=None, primary_key=True)
+    email: str = Field(unique=True, index=True)
+    hashed_password: str
+    plan: str = Field(default="free")  # free, pro, business
+    analyses_this_month: int = Field(default=0)
+    stripe_customer_id: str | None = Field(default=None)
+    created_date: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+
+
+class ApiKey(SQLModel, table=True):
+    """API keys for Business plan users."""
+
+    id: int | None = Field(default=None, primary_key=True)
+    user_id: int = Field(foreign_key="user.id")
+    key_hash: str = Field(unique=True, index=True)
+    label: str = Field(default="default")
+    created_date: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+
+
 # ---------------------------------------------------------------------------
 # Engine / init
 # ---------------------------------------------------------------------------
@@ -66,16 +89,21 @@ def _get_engine():
     """Return the shared SQLAlchemy engine (lazy singleton)."""
     global _engine
     if _engine is None:
-        DB_DIR.mkdir(parents=True, exist_ok=True)
-        _engine = create_engine(
-            f"sqlite:///{DB_PATH}",
-            connect_args={"check_same_thread": False},
-        )
+        db_url = getattr(settings, "DATABASE_URL", "") or f"sqlite:///{DB_PATH}"
+        if db_url.startswith("postgres"):
+            logger.info("Using PostgreSQL: %s", db_url.split("@")[-1] if "@" in db_url else "configured")
+            _engine = create_engine(db_url, pool_pre_ping=True)
+        else:
+            DB_DIR.mkdir(parents=True, exist_ok=True)
+            _engine = create_engine(
+                db_url,
+                connect_args={"check_same_thread": False},
+            )
     return _engine
 
 
 def init_db() -> None:
-    """Create ``data/cache.db`` and all tables if they do not exist."""
+    """Create database and all tables if they do not exist."""
     DB_DIR.mkdir(parents=True, exist_ok=True)
     SQLModel.metadata.create_all(_get_engine())
     logger.info("Database initialized at %s", DB_PATH.resolve())
@@ -85,6 +113,12 @@ def reset_engine() -> None:
     """Reset the engine singleton (used in tests)."""
     global _engine
     _engine = None
+
+
+def get_session():
+    """FastAPI dependency that yields a database session."""
+    with Session(_get_engine()) as session:
+        yield session
 
 
 # ---------------------------------------------------------------------------

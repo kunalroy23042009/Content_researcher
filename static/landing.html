@@ -1,0 +1,236 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Creator Content Radar — AI-Powered YouTube Channel Analysis</title>
+    <meta name="description" content="Paste your YouTube channel URL and get AI-powered niche profiling, competitor discovery, and trending content suggestions from YouTube and Reddit. Built for creators who want to grow.">
+    <meta name="keywords" content="youtube analysis, channel analysis, content ideas, competitor finder, ai youtube, creator tools, content research">
+    <meta property="og:title" content="Creator Content Radar — AI YouTube Analysis">
+    <meta property="og:description" content="AI-powered niche profiling, competitor discovery, and trending content suggestions for YouTube creators.">
+    <meta property="og:type" content="website">
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="Creator Content Radar">
+    <meta name="twitter:description" content="AI-powered YouTube channel analysis and content discovery.">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        :root {
+            --bg: #0f172a;
+            --bg2: #1e293b;
+            --primary: #6366f1;
+            --primary-light: #818cf8;
+            --accent: #a855f7;
+            --text: #f8fafc;
+            --text-muted: #94a3b8;
+            --success: #10b981;
+            --border: rgba(255,255,255,0.1);
+        }
+        body {
+            font-family: 'Inter', sans-serif;
+            background: linear-gradient(135deg, #0f172a 0%, #1e1b4b 50%, #312e81 100%);
+            color: var(--text);
+            line-height: 1.6;
+            min-height: 100vh;
+        }
+        .nav {
+            display: flex; justify-content: space-between; align-items: center;
+            padding: 1.5rem 2rem; max-width: 1200px; margin: 0 auto;
+        }
+        .nav .logo { font-size: 1.25rem; font-weight: 800; background: linear-gradient(135deg, var(--primary), var(--accent)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+        .nav a { color: var(--text-muted); text-decoration: none; font-size: 0.9rem; margin-left: 1.5rem; transition: color 0.2s; }
+        .nav a:hover { color: var(--text); }
+        .nav .cta { background: linear-gradient(135deg, var(--primary), var(--accent)); color: white; padding: 0.5rem 1.25rem; border-radius: 8px; font-weight: 600; }
+        .hero { text-align: center; padding: 4rem 2rem 3rem; max-width: 800px; margin: 0 auto; }
+        .hero h1 { font-size: clamp(2.5rem, 5vw, 3.5rem); font-weight: 800; line-height: 1.1; margin-bottom: 1rem; letter-spacing: -0.02em; }
+        .hero h1 span { background: linear-gradient(135deg, var(--primary), var(--accent)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+        .hero p { font-size: 1.2rem; color: var(--text-muted); margin-bottom: 2rem; }
+        .hero .cta-group { display: flex; gap: 1rem; justify-content: center; flex-wrap: wrap; }
+        .hero .btn-primary { background: linear-gradient(135deg, var(--primary), var(--accent)); color: white; padding: 0.875rem 2rem; border-radius: 12px; font-weight: 600; font-size: 1rem; text-decoration: none; border: none; cursor: pointer; box-shadow: 0 4px 14px rgba(99,102,241,0.4); transition: transform 0.2s; }
+        .hero .btn-primary:hover { transform: translateY(-2px); }
+        .hero .btn-secondary { background: rgba(255,255,255,0.08); color: var(--text); padding: 0.875rem 2rem; border-radius: 12px; font-weight: 600; text-decoration: none; border: 1px solid var(--border); }
+        .section { max-width: 1000px; margin: 0 auto; padding: 3rem 2rem; }
+        .section h2 { font-size: 2rem; font-weight: 700; text-align: center; margin-bottom: 0.5rem; }
+        .section .subtitle { text-align: center; color: var(--text-muted); margin-bottom: 2.5rem; }
+        .features { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 1.5rem; }
+        .feature { background: rgba(255,255,255,0.03); border: 1px solid var(--border); border-radius: 16px; padding: 1.5rem; transition: transform 0.2s, box-shadow 0.2s; }
+        .feature:hover { transform: translateY(-4px); box-shadow: 0 10px 30px rgba(0,0,0,0.2); }
+        .feature .icon { width: 48px; height: 48px; border-radius: 12px; background: linear-gradient(135deg, rgba(99,102,241,0.2), rgba(168,85,247,0.2)); display: flex; align-items: center; justify-content: center; font-size: 1.5rem; margin-bottom: 1rem; }
+        .feature h3 { font-size: 1.1rem; font-weight: 600; margin-bottom: 0.5rem; }
+        .feature p { color: var(--text-muted); font-size: 0.9rem; }
+        .steps { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 2rem; text-align: center; }
+        .step .num { width: 48px; height: 48px; border-radius: 50%; background: linear-gradient(135deg, var(--primary), var(--accent)); display: flex; align-items: center; justify-content: center; font-size: 1.25rem; font-weight: 700; margin: 0 auto 1rem; }
+        .step h3 { font-weight: 600; margin-bottom: 0.5rem; }
+        .step p { color: var(--text-muted); font-size: 0.9rem; }
+        .pricing { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 1.5rem; max-width: 900px; margin: 0 auto; }
+        .plan { background: rgba(255,255,255,0.03); border: 1px solid var(--border); border-radius: 16px; padding: 2rem; text-align: center; position: relative; }
+        .plan.featured { border-color: var(--primary); box-shadow: 0 0 30px rgba(99,102,241,0.15); }
+        .plan .badge { position: absolute; top: -12px; left: 50%; transform: translateX(-50%); background: linear-gradient(135deg, var(--primary), var(--accent)); color: white; font-size: 0.75rem; font-weight: 600; padding: 0.25rem 0.75rem; border-radius: 999px; }
+        .plan h3 { font-size: 1.1rem; font-weight: 600; margin-bottom: 0.5rem; }
+        .plan .price { font-size: 2.5rem; font-weight: 800; margin: 1rem 0; }
+        .plan .price span { font-size: 1rem; font-weight: 400; color: var(--text-muted); }
+        .plan ul { list-style: none; text-align: left; margin: 1.5rem 0; }
+        .plan li { padding: 0.5rem 0; color: var(--text-muted); font-size: 0.9rem; border-bottom: 1px solid var(--border); }
+        .plan li::before { content: "✓ "; color: var(--success); font-weight: 700; }
+        .plan .btn { display: block; background: linear-gradient(135deg, var(--primary), var(--accent)); color: white; padding: 0.75rem; border-radius: 10px; font-weight: 600; text-decoration: none; margin-top: 1rem; }
+        .plan .btn-outline { background: transparent; border: 1px solid var(--border); }
+        .faq { max-width: 700px; margin: 0 auto; }
+        .faq-item { background: rgba(255,255,255,0.03); border: 1px solid var(--border); border-radius: 12px; padding: 1.25rem; margin-bottom: 1rem; }
+        .faq-item h3 { font-size: 1rem; font-weight: 600; margin-bottom: 0.5rem; }
+        .faq-item p { color: var(--text-muted); font-size: 0.9rem; }
+        .footer { text-align: center; padding: 3rem 2rem; color: var(--text-muted); font-size: 0.85rem; border-top: 1px solid var(--border); margin-top: 2rem; }
+        .footer a { color: var(--primary-light); text-decoration: none; }
+        @media (max-width: 640px) { .nav { padding: 1rem; } .nav a { display: none; } .nav .cta { display: block; } }
+    </style>
+</head>
+<body>
+
+<nav class="nav">
+    <div class="logo">Creator Content Radar</div>
+    <div>
+        <a href="#features">Features</a>
+        <a href="#how">How it works</a>
+        <a href="#pricing">Pricing</a>
+        <a href="/app" class="cta">Launch App</a>
+    </div>
+</nav>
+
+<section class="hero">
+    <h1>Know your <span>niche</span>.<br>Beat your <span>competitors</span>.<br>Grow your <span>channel</span>.</h1>
+    <p>Paste your YouTube channel URL and get AI-powered niche profiling, competitor discovery, and trending content ideas from YouTube and Reddit — in seconds.</p>
+    <div class="cta-group">
+        <a href="/app" class="btn-primary">Try it free</a>
+        <a href="#how" class="btn-secondary">See how it works</a>
+    </div>
+</section>
+
+<section class="section" id="features">
+    <h2>Everything you need to grow</h2>
+    <p class="subtitle">AI-powered tools built specifically for YouTube creators</p>
+    <div class="features">
+        <div class="feature">
+            <div class="icon">🎯</div>
+            <h3>Niche Profiling</h3>
+            <p>AI analyzes your channel and identifies your exact niche, content style, target audience, and growth opportunities.</p>
+        </div>
+        <div class="feature">
+            <div class="icon">🔍</div>
+            <h3>Competitor Discovery</h3>
+            <p>Find similar channels in your niche, ranked by relevance and audience size. Know who you're competing with.</p>
+        </div>
+        <div class="feature">
+            <div class="icon">📈</div>
+            <h3>Trending Topics</h3>
+            <p>Search across YouTube and Reddit for what's trending in your niche. Classified as trending, popular, or underrated.</p>
+        </div>
+        <div class="feature">
+            <div class="icon">💡</div>
+            <h3>AI Content Angles</h3>
+            <p>Get specific, actionable content ideas tailored to your channel's style and audience. Not generic advice.</p>
+        </div>
+        <div class="feature">
+            <div class="icon">⚡</div>
+            <h3>Multi-AI Support</h3>
+            <p>Powered by Gemini, Groq, and OpenRouter with automatic fallback. Your analysis always completes.</p>
+        </div>
+        <div class="feature">
+            <div class="icon">📤</div>
+            <h3>Export & Share</h3>
+            <p>Export your analysis as PDF or CSV. Share insights with your team. API access available on Business plan.</p>
+        </div>
+    </div>
+</section>
+
+<section class="section" id="how">
+    <h2>How it works</h2>
+    <p class="subtitle">Three steps from URL to content strategy</p>
+    <div class="steps">
+        <div class="step">
+            <div class="num">1</div>
+            <h3>Paste your channel URL</h3>
+            <p>Drop in any YouTube channel link — @handle, /channel/, or /c/ format. We'll fetch the data.</p>
+        </div>
+        <div class="step">
+            <div class="num">2</div>
+            <h3>Get your niche profile</h3>
+            <p>AI analyzes your channel stats, recent videos, and content patterns to build a detailed niche profile.</p>
+        </div>
+        <div class="step">
+            <div class="num">3</div>
+            <h3>Discover & create</h3>
+            <p>Find competitors, search trending topics, and get AI-generated content angles tailored to your channel.</p>
+        </div>
+    </div>
+</section>
+
+<section class="section" id="pricing">
+    <h2>Simple pricing</h2>
+    <p class="subtitle">Start free. Upgrade when you're ready.</p>
+    <div class="pricing">
+        <div class="plan">
+            <h3>Free</h3>
+            <div class="price">$0<span>/mo</span></div>
+            <ul>
+                <li>3 analyses per month</li>
+                <li>YouTube + Reddit search</li>
+                <li>Basic niche profile</li>
+                <li>Competitor discovery</li>
+            </ul>
+            <a href="/app" class="btn btn-outline">Start free</a>
+        </div>
+        <div class="plan featured">
+            <div class="badge">Most popular</div>
+            <h3>Pro</h3>
+            <div class="price">$9<span>/mo</span></div>
+            <ul>
+                <li>50 analyses per month</li>
+                <li>Full competitor analysis</li>
+                <li>AI content suggestions</li>
+                <li>PDF & CSV export</li>
+                <li>Content gap identification</li>
+            </ul>
+            <a href="/app?upgrade=pro" class="btn">Upgrade to Pro</a>
+        </div>
+        <div class="plan">
+            <h3>Business</h3>
+            <div class="price">$29<span>/mo</span></div>
+            <ul>
+                <li>Unlimited analyses</li>
+                <li>Team seats</li>
+                <li>API access</li>
+                <li>Priority processing</li>
+                <li>Everything in Pro</li>
+            </ul>
+            <a href="/app?upgrade=business" class="btn">Upgrade to Business</a>
+        </div>
+    </div>
+</section>
+
+<section class="section">
+    <div class="faq">
+        <div class="faq-item">
+            <h3>What data sources does it use?</h3>
+            <p>YouTube Data API v3 for channel stats, video metrics, and search. Reddit via PRAW for community discussions and trends. Google Gemini (and optional Groq/OpenRouter) for AI analysis.</p>
+        </div>
+        <div class="faq-item">
+            <h3>How accurate is the niche profiling?</h3>
+            <p>The AI analyzes your channel title, description, subscriber count, recent video titles, engagement metrics, and upload frequency to generate a niche profile. The more content you have, the more accurate it is.</p>
+        </div>
+        <div class="faq-item">
+            <h3>Can I use it without any API keys?</h3>
+            <p>No — you need at minimum a YouTube Data API key and a Gemini API key. Both have free tiers. Check the .env.example file for setup instructions.</p>
+        </div>
+        <div class="faq-item">
+            <h3>Is my data stored?</h3>
+            <p>Analysis results are cached locally for 24 hours to avoid redundant API calls. No data is sent to third parties. On the SaaS version, your account data is stored securely.</p>
+        </div>
+    </div>
+</section>
+
+<footer class="footer">
+    <p>Creator Content Radar — Built for YouTube creators who want to grow.</p>
+    <p style="margin-top: 0.5rem;"><a href="/app">Launch App</a> · <a href="/docs">API Docs</a> · <a href="https://github.com/kunalroy23042009/Content_researcher">GitHub</a></p>
+</footer>
+
+</body>
+</html>

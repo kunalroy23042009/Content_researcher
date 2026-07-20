@@ -18,7 +18,10 @@ env/
 
 # Databases
 *.db
+*.sqlite
+*.sqlite3
 data/*.db
+data/*.sqlite
 
 # IDE
 .vscode/
@@ -27,3 +30,8 @@ data/*.db
 # OS
 Thumbs.db
 .DS_Store
+
+# Test artifacts
+.pytest_cache/
+.coverage
+htmlcov/

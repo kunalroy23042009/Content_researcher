@@ -1,97 +1,105 @@
 # Creator Content Radar
 
-A tool where a YouTube creator pastes their channel URL to get AI-powered niche profiling, competitor discovery, and trending content suggestions from YouTube.
+A tool where a YouTube creator pastes their channel URL to get AI-powered niche profiling, competitor discovery, and trending content suggestions from YouTube and Reddit.
+
+## Features
+
+- **Channel Analysis** — Paste any YouTube channel URL and get a full niche profile: niche, topics, content style, target audience, growth potential, and content recommendations
+- **Competitor Discovery** — AI generates search queries to find similar channels in your niche, ranked by subscriber-count proximity and search overlap
+- **Topic Search** — Search YouTube + Reddit for trending content in your niche. Results are classified as trending, popular, or underrated
+- **AI Content Angles** — Get specific, actionable content ideas tailored to your channel's style and audience
+- **Multi-AI Support** — Powered by Gemini, Groq, and OpenRouter with automatic fallback
+- **User Authentication** — JWT-based auth with free/pro/business plans
+- **Stripe Billing** — Subscription management with checkout and customer portal
+- **Export** — Download analysis as PDF or CSV (Pro+ plan)
+- **Rate Limiting** — Protects against API quota exhaustion
+- **Caching** — SQLite/PostgreSQL cache for 24h to avoid redundant API calls
+- **Monitoring** — Prometheus metrics at /metrics
+
+## Quick Start
+
+```bash
+# Clone
+git clone https://github.com/kunalroy23042009/Content_researcher.git
+cd Content_researcher
+
+# Install
+pip install -e ".[dev]"
+
+# Configure
+cp .env.example .env
+# Edit .env with your API keys
+
+# Run
+uvicorn app.main:app --reload
+
+# Open
+# http://localhost:8000 — Landing page
+# http://localhost:8000/app — App UI
+# http://localhost:8000/docs — API docs
+```
+
+## Environment Variables
+
+See `.env.example` for all required variables. You need at minimum:
+- `YOUTUBE_API_KEY` — YouTube Data API v3 key
+- `GEMINI_API_KEY` — Google Gemini API key
+- `SECRET_KEY` — JWT secret (generate with `python -c "import secrets; print(secrets.token_hex(32))"`)
+
+Optional:
+- `GROQ_API_KEY`, `OPENROUTER_API_KEY` — Alternative AI providers
+- `REDDIT_CLIENT_ID`, `REDDIT_CLIENT_SECRET` — Reddit search
+- `STRIPE_SECRET_KEY`, `STRIPE_WEBHOOK_SECRET` — Payments
+- `DATABASE_URL` — PostgreSQL URL for production
+
+## API Endpoints
+
+| Method | Path | Description |
+|--------|------|-------------|
+| POST | `/analyze-channel` | Analyze a YouTube channel |
+| POST | `/find-competitors` | Find competitor channels |
+| POST | `/search-topic` | Search YouTube + Reddit for topics |
+| POST | `/api/auth/register` | Register a new user |
+| POST | `/api/auth/login` | Login and get JWT |
+| GET | `/api/auth/me` | Get current user |
+| GET | `/api/billing/usage` | Get plan usage |
+| POST | `/api/billing/checkout` | Create Stripe checkout |
+| POST | `/api/billing/webhook` | Stripe webhook handler |
+| POST | `/api/billing/portal` | Stripe customer portal |
+| GET | `/api/analyze/{id}/export` | Export analysis (PDF/CSV) |
+| GET | `/metrics` | Prometheus metrics |
+| GET | `/health` | Health check |
 
 ## Tech Stack
 
-- Python 3.11
-- FastAPI (web framework)
-- SQLModel (SQLite database)
-- google-api-python-client (YouTube Data API)
-- google-generativeai (Gemini AI)
-- Plain HTML/JS frontend
+- Python 3.11, FastAPI, Uvicorn
+- SQLModel + SQLite (local) / PostgreSQL (production)
+- Google YouTube Data API v3, Google Gemini, Groq, OpenRouter
+- Reddit via PRAW
+- JWT auth (python-jose + passlib)
+- Stripe for payments
+- SlowAPI for rate limiting
+- Prometheus for monitoring
+- Vanilla HTML/CSS/JS frontend
 
-## Prerequisites
+## Deployment
 
-- Python 3.11 or higher
-- YouTube Data API v3 key
-- Google Gemini API key
+The app is configured for Render:
 
-## Local Development
+1. Connect your GitHub repo to Render
+2. Set environment variables (see `.env.example`)
+3. Render will auto-deploy from `main` using `render.yaml`
 
-1. Clone the repository and navigate to the project directory
-
-2. Create a `.env` file with your API credentials:
+Docker is also supported:
 ```bash
-YOUTUBE_API_KEY=your_youtube_api_key
-GEMINI_API_KEY=your_gemini_api_key
+docker build -t content-radar .
+docker run -p 8000:8000 content-radar
 ```
 
-3. Install dependencies:
-```bash
-pip install -e .
-```
-
-4. Run the development server:
-```bash
-python -m uvicorn app.main:app --reload
-```
-
-5. Open your browser to `http://localhost:8000`
-
-## Running Tests
+## Testing
 
 ```bash
-pytest tests/
-```
-
-## Deployment (Render)
-
-This project is configured for deployment on Render using Docker.
-
-### Option A: Docker Deployment (Recommended)
-
-1. Push your code to a Git repository
-2. Create a new Web Service on Render
-3. Connect your repository
-4. Select "Docker" as the runtime
-5. Add environment variables in Render's dashboard:
-   - `YOUTUBE_API_KEY`
-   - `GEMINI_API_KEY`
-6. Deploy
-
-The Dockerfile automatically uses the `PORT` environment variable provided by Render (defaults to 8000 for local development).
-
-### Option B: Native Python Deployment
-
-If you prefer not to use Docker, use these settings in Render:
-
-- **Build Command**: `pip install .`
-- **Start Command**: `uvicorn app.main:app --host 0.0.0.0 --port $PORT`
-
-Add the same environment variables as above in Render's dashboard.
-
-## Project Structure
-
-```
-.
-├── app/
-│   ├── main.py              # FastAPI application entry point
-│   ├── models.py            # Pydantic/SQLModel definitions
-│   ├── db.py                # Database and caching layer
-│   ├── config.py            # Configuration and settings
-│   ├── channel_analyzer.py  # YouTube channel analysis
-│   ├── competitor_finder.py # Competitor discovery
-│   ├── topic_search.py      # YouTube content search
-│   ├── classifier.py       # Content classification logic
-│   └── ai_reasoning.py     # AI-powered insights
-├── static/
-│   └── index.html          # Frontend application
-├── tests/                  # Automated tests
-├── data/                   # SQLite database (created automatically)
-├── Dockerfile              # Container configuration
-├── pyproject.toml          # Python dependencies
-└── .env.example            # Environment variables template
+pytest --cov=app --cov-report=term-missing
 ```
 
 ## License
