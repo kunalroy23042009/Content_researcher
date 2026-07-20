@@ -1,7 +1,7 @@
 """AI reasoning — generates content angle suggestions using multiple AI providers.
 
-Phase 8 implementation.  Turns a classified topic feed plus channel profile into
-actionable ``TopicInsight`` recommendations with provider fallback.
+Improved prompts for more specific, actionable insights that reference
+actual search results and channel data.
 """
 
 from __future__ import annotations
@@ -24,7 +24,6 @@ FALLBACK_SUMMARY = (
 
 
 def _strip_markdown_fences(text: str) -> str:
-    """Remove optional ```json fences from a model response."""
     text = text.strip()
     if text.startswith("```"):
         text = text.split("\n", 1)[1]
@@ -34,7 +33,7 @@ def _strip_markdown_fences(text: str) -> str:
 
 
 def _select_results_for_prompt(results: list[ContentResult]) -> list[ContentResult]:
-    """Pick the top results to include in the Gemini prompt (up to 15)."""
+    """Pick the top results to include in the AI prompt (up to 15)."""
     if not results:
         return []
 
@@ -62,11 +61,16 @@ def _format_results_for_prompt(results: list[ContentResult]) -> str:
 
     lines = []
     for i, result in enumerate(results, start=1):
+        metrics = result.raw_metrics or {}
+        views = metrics.get("views", metrics.get("upvotes", 0))
+        likes = metrics.get("likes", metrics.get("comments", 0))
+
         lines.append(
-            f"{i}. [{result.platform}] {result.title}\n"
-            f"   classification: {result.classification}\n"
-            f"   engagement_score: {result.engagement_score:,.0f}\n"
-            f"   source: {result.source}"
+            f"{i}. [{result.platform.upper()}] {result.title}\n"
+            f"   Classification: {result.classification}\n"
+            f"   Engagement: {result.engagement_score:,.0f} (views/upvotes: {views:,}, likes/comments: {likes:,})\n"
+            f"   Source: {result.source}\n"
+            f"   URL: {result.url}"
         )
     return "\n".join(lines)
 
@@ -76,29 +80,27 @@ def _build_prompt(
     topic: str,
     results: list[ContentResult],
 ) -> str:
-    """Build the Gemini prompt from channel profile, topic, and top results."""
+    """Build the AI prompt from channel profile, topic, and top results."""
     selected = _select_results_for_prompt(results)
     results_block = _format_results_for_prompt(selected)
 
-    return f"""You are a YouTube content strategist helping a specific creator decide what to make next.
+    # Count classifications for context
+    trending_count = sum(1 for r in results if r.classification == "trending")
+    popular_count = sum(1 for r in results if r.classification == "popular")
+    underrated_count = sum(1 for r in results if r.classification == "underrated")
+
+    return f"""You are an expert YouTube content strategist. Your job is to help a specific creator decide what to make next based on real data from their niche.
 
 Analyze the channel profile, searched topic, and classified content results below.
-Return ONLY a JSON object with exactly these keys (no markdown, no code fences):
-{{
-  "summary": "<2-3 sentences on what is happening around this topic right now>",
-  "content_angles": [
-    "<specific actionable angle 1 tailored to this channel>",
-    "<specific actionable angle 2 tailored to this channel>",
-    "<specific actionable angle 3 tailored to this channel>"
-  ],
-  "content_gap": "<one clearly unclaimed angle you see in the results, or null if none>"
-}}
+Return ONLY a raw JSON object (no markdown, no code fences) with exactly these keys:
 
-Requirements:
-- Reference actual result titles or patterns from the results when possible.
-- Content angles must be specific to THIS channel's niche, tone, and format — not generic advice.
-- Provide exactly 3 content_angles strings.
-- content_gap should identify an opportunity competitors/results have not claimed; use null if unclear.
+{{
+  "summary": "3-4 sentences analyzing what is happening around this topic right now. Reference specific patterns from the results — which types of content are trending vs popular vs underrated, what angles are saturated, and what the engagement patterns tell you about audience interest. Be analytical, not descriptive.",
+  "content_angles": [
+    "4-5 specific, actionable content angles for THIS channel. Each angle must: (a) reference a specific result or pattern from the data, (b) explain why it fits this channel's niche and audience, (c) describe how to execute it differently from what competitors are doing. Example: 'Create a "Why nobody talks about [underrated topic X]" video — r/technology is buzzing about it (see result #3, 500 upvotes) but no YouTube channel in your niche has covered it. Your concise review style would make this a 8-10 min video with a provocative thumbnail.'"
+  ],
+  "content_gap": "Identify one clear content gap you see in the results — an angle, topic, or format that competitors and trending content have NOT covered but the audience clearly wants. Be specific about what the gap is and how to fill it. Use null only if the results are too sparse to identify a gap."
+}}
 
 Channel profile:
 - Title: {profile.title}
@@ -111,13 +113,22 @@ Channel profile:
 
 Searched topic: {topic}
 
+Result distribution: {trending_count} trending, {popular_count} popular, {underrated_count} underrated
+
 Top classified results:
 {results_block}
+
+Critical requirements:
+- Do NOT give generic advice. Every recommendation must reference specific data from the results above.
+- Content angles must be specific enough that the creator could start scripting the video today.
+- If most results are "popular" (old but high engagement), focus on how to update or improve on those proven formats.
+- If results are "trending" (recent + high velocity), focus on how to jump on the trend quickly with a unique angle.
+- If results are "underrated" (high ratio, low reach), focus on how to take an underexposed topic and make it mainstream.
 """
 
 
 def _parse_insight_response(text: str) -> TopicInsight:
-    """Parse and validate a Gemini JSON response into a ``TopicInsight``."""
+    """Parse and validate an AI JSON response into a TopicInsight."""
     cleaned = _strip_markdown_fences(text)
     data = json.loads(cleaned)
 
@@ -129,8 +140,8 @@ def _parse_insight_response(text: str) -> TopicInsight:
         raise ValueError("Missing or invalid summary")
 
     angles = data.get("content_angles")
-    if not isinstance(angles, list) or len(angles) != 3:
-        raise ValueError("content_angles must be a list of exactly 3 strings")
+    if not isinstance(angles, list) or not (3 <= len(angles) <= 6):
+        raise ValueError("content_angles must be a list of 3-6 strings")
     if not all(isinstance(angle, str) and angle.strip() for angle in angles):
         raise ValueError("Each content angle must be a non-empty string")
 
@@ -148,7 +159,6 @@ def _parse_insight_response(text: str) -> TopicInsight:
 
 
 def _fallback_insight() -> TopicInsight:
-    """Return a safe fallback when Gemini output cannot be parsed."""
     return TopicInsight(
         summary=FALLBACK_SUMMARY,
         content_angles=[],
@@ -166,11 +176,7 @@ def generate_insights(
     topic: str,
     results: list[ContentResult],
 ) -> TopicInsight:
-    """Generate topic-specific insights and content angles for *profile*.
-
-    Sends the channel niche profile, topic, and top classified results to AI.
-    Uses provider fallback system and retries on malformed output.
-    """
+    """Generate topic-specific insights and content angles for *profile*."""
     prompt = _build_prompt(profile, topic, results)
 
     last_error: Exception | None = None
@@ -178,7 +184,7 @@ def generate_insights(
         try:
             response = generate_ai_response(
                 prompt=prompt,
-                complexity=ComplexityLevel.MEDIUM,  # Topic insights are medium complexity
+                complexity=ComplexityLevel.MEDIUM,
             )
             return _parse_insight_response(response)
         except Exception as exc:

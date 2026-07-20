@@ -1,7 +1,8 @@
 """Classifier — labels content as trending, popular, or underrated.
 
-Phase 7 implementation.  Pure heuristics relative to the current result set —
-no external API calls.
+Improved classification using engagement velocity (engagement per hour since publish)
+combined with recency to identify trending content. Popular = high absolute engagement.
+Underrated = high engagement relative to audience size but low absolute reach.
 """
 
 from __future__ import annotations
@@ -12,16 +13,18 @@ from datetime import datetime, timezone
 from app.models import ContentResult
 
 # ---------------------------------------------------------------------------
-# Tunable thresholds (change these without touching classification logic)
+# Tunable thresholds
 # ---------------------------------------------------------------------------
 
-TRENDING_MAX_AGE_HOURS = 72
-TRENDING_ENGAGEMENT_PERCENTILE = 75  # must be above this percentile of the set
+TRENDING_MAX_AGE_HOURS = 168          # 7 days (was 72h — too strict)
+TRENDING_MIN_ENGAGEMENT = 100.0       # floor to avoid noise
+TRENDING_VELOCITY_PERCENTILE = 60    # top 40% by velocity → trending candidate
 
-POPULAR_TOP_PERCENT = 20  # top 20% by engagement_score → 80th percentile floor
+POPULAR_TOP_PERCENT = 25             # top 25% by engagement → popular
+POPULAR_MIN_ENGAGEMENT = 500.0       # must have meaningful reach
 
-UNDERRATED_TOP_PERCENT = 15  # top 15% by engagement/audience ratio
-UNDERRATED_MIN_ENGAGEMENT = 10.0  # floor when audience size is unavailable
+UNDERRATED_TOP_PERCENT = 30          # top 30% by engagement ratio → underrated
+UNDERRATED_MIN_ENGAGEMENT = 5.0      # floor
 
 
 # ---------------------------------------------------------------------------
@@ -30,10 +33,7 @@ UNDERRATED_MIN_ENGAGEMENT = 10.0  # floor when audience size is unavailable
 
 
 def _percentile(values: list[float], pct: float) -> float:
-    """Return the *pct*-th percentile of *values* (linear interpolation).
-
-    *pct* is in [0, 100].  Returns 0.0 for an empty list.
-    """
+    """Return the *pct*-th percentile of *values* (linear interpolation)."""
     if not values:
         return 0.0
     if len(values) == 1:
@@ -50,42 +50,41 @@ def _percentile(values: list[float], pct: float) -> float:
 
 
 def _ensure_aware(dt: datetime) -> datetime:
-    """Treat naive datetimes as UTC so age comparisons are safe."""
     if dt.tzinfo is None:
         return dt.replace(tzinfo=timezone.utc)
     return dt
 
 
 def _age_hours(published_at: datetime, now: datetime) -> float:
-    """Hours between *published_at* and *now* (never negative)."""
     delta = _ensure_aware(now) - _ensure_aware(published_at)
     return max(delta.total_seconds() / 3600.0, 0.0)
 
 
-def _engagement_ratio(result: ContentResult) -> float | None:
-    """Engagement relative to audience size, or ``None`` if below the floor.
+def _engagement_velocity(result: ContentResult, now: datetime) -> float:
+    """Engagement per hour since publish — higher = faster-growing.
 
-    YouTube: views / channel_subscriber_count (when present).
-    Reddit:  upvotes / subreddit_subscriber_count (when present).
-    Fallback: raw ``engagement_score`` when audience size is missing.
+    Returns 0 for content published in the future or with 0 engagement.
     """
+    age_h = _age_hours(result.published_at, now)
+    if age_h < 1:  # Less than 1 hour old — treat as 1h to avoid div-by-zero explosion
+        age_h = 1.0
+    return result.engagement_score / age_h
+
+
+def _engagement_ratio(result: ContentResult) -> float | None:
+    """Engagement relative to audience size, or None if unavailable."""
     metrics = result.raw_metrics or {}
 
     if result.platform == "youtube":
         engagement = float(metrics.get("views", result.engagement_score))
-        audience = metrics.get("channel_subscriber_count")
-        if audience is None:
-            audience = metrics.get("subscriber_count")
+        audience = metrics.get("channel_subscriber_count") or metrics.get("subscriber_count")
     else:
         engagement = float(metrics.get("upvotes", result.engagement_score))
-        audience = metrics.get("subreddit_subscriber_count")
-        if audience is None:
-            audience = metrics.get("subscribers")
+        audience = metrics.get("subreddit_subscriber_count") or metrics.get("subscribers")
 
     if audience is not None and float(audience) > 0:
         return engagement / float(audience)
 
-    # No audience size — fall back to raw engagement, gated by a floor.
     if result.engagement_score < UNDERRATED_MIN_ENGAGEMENT:
         return None
     return float(result.engagement_score)
@@ -103,34 +102,53 @@ def classify_results(
 ) -> list[ContentResult]:
     """Label each result as trending, popular, underrated, or none.
 
-    Labels are mutually exclusive and applied in priority order:
-    ``trending`` → ``popular`` → ``underrated`` → ``none``.
+    Classification priority: trending → popular → underrated → none.
 
-    Percentile thresholds are computed against *this* result set only.
+    **Trending**: Published within 7 days AND has high engagement velocity
+    (engagement per hour) relative to the set. This catches recently-published
+    content that is gaining traction fast.
+
+    **Popular**: High absolute engagement (top 25% of the set) regardless of age.
+    This catches established, well-performing content.
+
+    **Underrated**: High engagement-to-audience ratio but low absolute reach.
+    This catches content that punches above its weight in small channels/subreddits.
     """
     if not results:
         return []
 
     now = now or datetime.now(timezone.utc)
+
+    # Compute velocity for all results
+    velocities = [_engagement_velocity(r, now) for r in results]
     scores = [r.engagement_score for r in results]
-    trending_floor = _percentile(scores, TRENDING_ENGAGEMENT_PERCENTILE)
+
+    # Thresholds
+    trending_velocity_floor = _percentile(
+        [v for v in velocities if v > 0],
+        TRENDING_VELOCITY_PERCENTILE,
+    )
     popular_floor = _percentile(scores, 100 - POPULAR_TOP_PERCENT)
 
-    # Pre-compute ratios for underrated (skip results that will already be popular).
-    # We still need the full ratio distribution among eligible candidates only after
-    # knowing popular/trending — compute ratios for all first, then threshold later.
+    # Compute ratios for underrated
     ratios: list[float | None] = [_engagement_ratio(r) for r in results]
 
     labeled: list[ContentResult] = []
-    pending_underrated: list[tuple[int, float]] = []  # (index, ratio)
+    pending_underrated: list[tuple[int, float]] = []
 
     for i, result in enumerate(results):
         age_h = _age_hours(result.published_at, now)
+        velocity = velocities[i]
+
+        # Trending: recent + high velocity
         is_trending = (
             age_h <= TRENDING_MAX_AGE_HOURS
-            and result.engagement_score >= trending_floor
+            and result.engagement_score >= TRENDING_MIN_ENGAGEMENT
+            and velocity >= trending_velocity_floor
         )
-        is_popular = result.engagement_score >= popular_floor
+
+        # Popular: high absolute engagement (regardless of age)
+        is_popular = result.engagement_score >= max(popular_floor, POPULAR_MIN_ENGAGEMENT)
 
         if is_trending:
             classification = "trending"
@@ -139,12 +157,12 @@ def classify_results(
         else:
             classification = "none"
             ratio = ratios[i]
-            if ratio is not None:
+            if ratio is not None and ratio > 0:
                 pending_underrated.append((i, ratio))
 
         labeled.append(result.model_copy(update={"classification": classification}))
 
-    # Underrated: top UNDERRATED_TOP_PERCENT of ratios among non-trending/non-popular.
+    # Underrated: top UNDERRATED_TOP_PERCENT of ratios among non-trending/non-popular
     if pending_underrated:
         ratio_values = [r for _, r in pending_underrated]
         underrated_floor = _percentile(ratio_values, 100 - UNDERRATED_TOP_PERCENT)

@@ -6,801 +6,1097 @@
     <title>Creator Content Radar</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     <style>
-        :root {
-            /* Color Palette - Refined for accessibility and visual hierarchy */
-            --primary-gradient: linear-gradient(135deg, #6366f1 0%, #8b5cf6 50%, #a855f7 100%);
-            --primary-color: #6366f1;
-            --primary-light: #818cf8;
-            --primary-dark: #4f46e5;
-            --secondary-color: #8b5cf6;
-            --accent-color: #a855f7;
-            --success-color: #10b981;
-            --error-color: #ef4444;
-            --warning-color: #f59e0b;
-            
-            /* Neutral Colors */
-            --bg-primary: #0f172a;
-            --bg-secondary: #1e293b;
-            --bg-tertiary: #334155;
-            --text-primary: #f8fafc;
+        /* ===== Theme Variables ===== */
+        :root[data-theme="dark"] {
+            --bg: #0f172a;
+            --bg-elevated: #1e293b;
+            --bg-card: #1e293b;
+            --bg-hover: #334155;
+            --bg-input: #0f172a;
+            --text: #f1f5f9;
             --text-secondary: #cbd5e1;
             --text-muted: #94a3b8;
-            
-            /* Spacing System - 4px grid */
-            --space-1: 4px;
-            --space-2: 8px;
-            --space-3: 12px;
-            --space-4: 16px;
-            --space-5: 20px;
-            --space-6: 24px;
-            --space-8: 32px;
-            --space-10: 40px;
-            --space-12: 48px;
-            
-            /* Border Radius */
-            --radius-sm: 8px;
-            --radius-md: 12px;
-            --radius-lg: 16px;
-            --radius-xl: 20px;
-            
-            /* Shadows */
-            --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.1);
-            --shadow-md: 0 4px 6px rgba(0, 0, 0, 0.1);
-            --shadow-lg: 0 10px 15px rgba(0, 0, 0, 0.1);
-            --shadow-xl: 0 20px 25px rgba(0, 0, 0, 0.15);
-            
-            /* Transitions */
-            --transition-fast: 150ms ease;
-            --transition-base: 200ms ease;
-            --transition-slow: 300ms ease;
+            --border: #334155;
+            --border-hover: #475569;
+            --primary: #6366f1;
+            --primary-light: #818cf8;
+            --primary-soft: rgba(99, 102, 241, 0.12);
+            --accent: #a855f7;
+            --success: #10b981;
+            --error: #ef4444;
+            --warning: #f59e0b;
+            --shadow: 0 4px 24px rgba(0, 0, 0, 0.4);
+            --shadow-hover: 0 8px 32px rgba(0, 0, 0, 0.5);
+            --gradient: linear-gradient(135deg, #6366f1, #a855f7);
+            --skeleton: rgba(148, 163, 184, 0.1);
         }
 
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
+        :root[data-theme="light"] {
+            --bg: #ffffff;
+            --bg-elevated: #f8fafc;
+            --bg-card: #ffffff;
+            --bg-hover: #f1f5f9;
+            --bg-input: #f8fafc;
+            --text: #0f172a;
+            --text-secondary: #475569;
+            --text-muted: #94a3b8;
+            --border: #e2e8f0;
+            --border-hover: #cbd5e1;
+            --primary: #6366f1;
+            --primary-light: #818cf8;
+            --primary-soft: rgba(99, 102, 241, 0.08);
+            --accent: #a855f7;
+            --success: #059669;
+            --error: #dc2626;
+            --warning: #d97706;
+            --shadow: 0 1px 3px rgba(0, 0, 0, 0.08), 0 4px 12px rgba(0, 0, 0, 0.04);
+            --shadow-hover: 0 4px 16px rgba(0, 0, 0, 0.12);
+            --gradient: linear-gradient(135deg, #6366f1, #a855f7);
+            --skeleton: rgba(148, 163, 184, 0.15);
         }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
 
         body {
-            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-            background: linear-gradient(135deg, #0f172a 0%, #1e1b4b 50%, #312e81 100%);
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            background: var(--bg);
+            color: var(--text);
             min-height: 100vh;
-            color: var(--text-primary);
-            padding: var(--space-6);
+            transition: background 0.3s ease, color 0.3s ease;
             line-height: 1.6;
-            letter-spacing: -0.01em;
         }
 
-        .container {
-            max-width: 1400px;
+        /* ===== Top Bar ===== */
+        .topbar {
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 12px 24px;
+            background: var(--bg);
+            border-bottom: 1px solid var(--border);
+            backdrop-filter: blur(12px);
+        }
+
+        .topbar-logo {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-weight: 700;
+            font-size: 1.1rem;
+            color: var(--text);
+            text-decoration: none;
+        }
+
+        .topbar-logo svg {
+            width: 28px;
+            height: 28px;
+        }
+
+        .topbar-actions {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .theme-toggle {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 38px;
+            height: 38px;
+            border-radius: 10px;
+            border: 1px solid var(--border);
+            background: var(--bg-elevated);
+            cursor: pointer;
+            transition: all 0.2s;
+            color: var(--text-secondary);
+        }
+
+        .theme-toggle:hover {
+            border-color: var(--border-hover);
+            background: var(--bg-hover);
+        }
+
+        .theme-toggle svg {
+            width: 18px;
+            height: 18px;
+        }
+
+        .theme-toggle .sun { display: none; }
+        .theme-toggle .moon { display: block; }
+        :root[data-theme="light"] .theme-toggle .sun { display: block; }
+        :root[data-theme="light"] .theme-toggle .moon { display: none; }
+
+        /* ===== Main Layout ===== */
+        .main {
+            max-width: 900px;
             margin: 0 auto;
-            padding: 0 var(--space-4);
+            padding: 24px;
         }
 
-        .header {
+        /* ===== Hero ===== */
+        .hero {
             text-align: center;
-            padding: var(--space-12) 0;
-            animation: fadeInDown 0.8s ease-out;
+            padding: 60px 0 40px;
         }
 
-        .header h1 {
-            font-size: clamp(2.5rem, 5vw, 4rem);
+        .hero h1 {
+            font-size: 2.5rem;
             font-weight: 800;
-            background: var(--primary-gradient);
+            background: var(--gradient);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
             background-clip: text;
-            margin-bottom: var(--space-3);
-            letter-spacing: -0.02em;
-            line-height: 1.1;
+            letter-spacing: -0.03em;
+            margin-bottom: 12px;
         }
 
-        .header p {
-            font-size: clamp(1rem, 2vw, 1.25rem);
-            color: var(--text-secondary);
-            font-weight: 400;
-            max-width: 600px;
-            margin: 0 auto;
-        }
-
-        .section {
-            background: rgba(255, 255, 255, 0.03);
-            backdrop-filter: blur(20px);
-            border: 1px solid rgba(255, 255, 255, 0.08);
-            border-radius: var(--radius-xl);
-            padding: var(--space-8);
-            margin-bottom: var(--space-8);
-            animation: fadeInUp 0.6s ease-out;
-            box-shadow: var(--shadow-lg);
-            transition: transform var(--transition-slow), box-shadow var(--transition-slow);
-        }
-
-        .section:hover {
-            transform: translateY(-2px);
-            box-shadow: var(--shadow-xl);
-        }
-
-        .section h2 {
-            font-size: clamp(1.5rem, 3vw, 2rem);
-            font-weight: 700;
-            margin-bottom: var(--space-6);
-            color: var(--primary-light);
-            display: flex;
-            align-items: center;
-            gap: var(--space-3);
-            letter-spacing: -0.01em;
-        }
-
-        .section h2::before {
-            content: '';
-            width: 4px;
-            height: 32px;
-            background: var(--primary-gradient);
-            border-radius: 2px;
-            flex-shrink: 0;
-        }
-
-        .input-group {
-            margin-bottom: var(--space-5);
-        }
-
-        label {
-            display: block;
-            margin-bottom: var(--space-2);
-            font-weight: 600;
-            color: var(--text-primary);
-            font-size: 0.95rem;
-            letter-spacing: -0.005em;
-        }
-
-        input[type="text"] {
-            width: 100%;
-            padding: var(--space-4) var(--space-5);
-            background: rgba(255, 255, 255, 0.08);
-            border: 2px solid rgba(255, 255, 255, 0.15);
-            border-radius: var(--radius-md);
-            color: var(--text-primary);
-            font-size: 1rem;
-            transition: all var(--transition-base);
-            font-family: inherit;
-            min-height: 52px;
-        }
-
-        input[type="text"]:focus {
-            outline: none;
-            border-color: var(--primary-color);
-            background: rgba(255, 255, 255, 0.12);
-            box-shadow: 0 0 0 4px rgba(99, 102, 241, 0.1);
-        }
-
-        input[type="text"]::placeholder {
+        .hero p {
+            font-size: 1.15rem;
             color: var(--text-muted);
+            font-weight: 400;
         }
 
-        button {
-            padding: var(--space-4) var(--space-8);
-            background: var(--primary-gradient);
+        /* ===== Search Bar ===== */
+        .search-bar {
+            position: relative;
+            margin: 32px auto;
+            max-width: 680px;
+        }
+
+        .search-input-wrapper {
+            display: flex;
+            gap: 8px;
+            background: var(--bg-elevated);
+            border: 1px solid var(--border);
+            border-radius: 14px;
+            padding: 6px;
+            transition: border-color 0.2s, box-shadow 0.2s;
+        }
+
+        .search-input-wrapper:focus-within {
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px var(--primary-soft);
+        }
+
+        .search-input {
+            flex: 1;
+            border: none;
+            background: transparent;
+            color: var(--text);
+            font-size: 1rem;
+            padding: 12px 16px;
+            outline: none;
+            font-family: inherit;
+        }
+
+        .search-input::placeholder { color: var(--text-muted); }
+
+        .search-btn {
+            padding: 10px 24px;
+            background: var(--gradient);
             color: white;
             border: none;
-            border-radius: var(--radius-md);
-            cursor: pointer;
-            font-size: 1rem;
-            font-weight: 600;
-            transition: all var(--transition-base);
-            font-family: inherit;
-            box-shadow: 0 4px 14px rgba(99, 102, 241, 0.4);
-            min-height: 52px;
-            letter-spacing: -0.005em;
-            position: relative;
-            overflow: hidden;
-        }
-
-        button::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background: linear-gradient(135deg, rgba(255,255,255,0.2) 0%, transparent 100%);
-            opacity: 0;
-            transition: opacity var(--transition-base);
-        }
-
-        button:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 8px 20px rgba(99, 102, 241, 0.5);
-        }
-
-        button:hover::before {
-            opacity: 1;
-        }
-
-        button:active {
-            transform: translateY(0);
-        }
-
-        button:disabled {
-            opacity: 0.6;
-            cursor: not-allowed;
-            transform: none;
-        }
-
-        .loading-indicator {
-            display: none;
-            color: var(--primary-light);
-            font-style: italic;
-            margin-left: var(--space-4);
-            font-size: 0.9rem;
-            animation: pulse 1.5s infinite;
-            font-weight: 500;
-        }
-
-        .error-message {
-            color: var(--error-color);
-            font-weight: 500;
-            margin-top: var(--space-4);
-            padding: var(--space-4);
-            background: rgba(239, 68, 68, 0.1);
-            border-radius: var(--radius-sm);
-            border-left: 4px solid var(--error-color);
-            display: none;
+            border-radius: 10px;
             font-size: 0.95rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: opacity 0.2s, transform 0.1s;
+            font-family: inherit;
+            white-space: nowrap;
         }
 
-        #profile-output {
-            margin-top: var(--space-6);
-            padding: var(--space-6);
-            background: rgba(99, 102, 241, 0.08);
-            border-radius: var(--radius-lg);
-            border: 1px solid rgba(99, 102, 241, 0.2);
+        .search-btn:hover { opacity: 0.9; }
+        .search-btn:active { transform: scale(0.97); }
+        .search-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+
+        /* ===== Loading & Error ===== */
+        .loading-bar {
+            display: none;
+            width: 100%;
+            height: 3px;
+            background: var(--skeleton);
+            border-radius: 2px;
+            overflow: hidden;
+            margin-top: 12px;
         }
 
-        #profile-output h3 {
-            font-size: 1.5rem;
-            font-weight: 700;
-            margin-bottom: var(--space-5);
-            color: var(--primary-light);
+        .loading-bar.active { display: block; }
+
+        .loading-bar::after {
+            content: '';
+            display: block;
+            width: 40%;
+            height: 100%;
+            background: var(--gradient);
+            border-radius: 2px;
+            animation: slide 1.2s ease-in-out infinite;
         }
 
-        #profile-output h4 {
+        @keyframes slide {
+            0% { transform: translateX(-100%); }
+            100% { transform: translateX(350%); }
+        }
+
+        .error-msg {
+            display: none;
+            padding: 12px 16px;
+            background: rgba(239, 68, 68, 0.1);
+            border: 1px solid rgba(239, 68, 68, 0.3);
+            border-radius: 10px;
+            color: var(--error);
+            font-size: 0.9rem;
+            margin-top: 12px;
+        }
+
+        /* ===== Cards ===== */
+        .card {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            padding: 24px;
+            margin-bottom: 20px;
+            box-shadow: var(--shadow);
+            transition: border-color 0.2s, box-shadow 0.2s;
+            animation: fadeIn 0.4s ease-out;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(8px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .card-header {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 16px;
+        }
+
+        .card-header h2 {
             font-size: 1.1rem;
             font-weight: 600;
-            margin-bottom: var(--space-4);
-            color: var(--primary-light);
+            color: var(--text);
         }
 
-        #profile-output p {
-            margin-bottom: var(--space-3);
-            line-height: 1.7;
-            color: var(--text-secondary);
+        .card-header .icon-badge {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 36px;
+            height: 36px;
+            border-radius: 10px;
+            background: var(--primary-soft);
+            font-size: 1.1rem;
         }
 
-        #profile-output strong {
-            color: var(--text-primary);
-            font-weight: 600;
-        }
-
-        .competitor-list {
+        /* ===== Stats Grid ===== */
+        .stats-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-            gap: var(--space-4);
-            margin-top: var(--space-5);
+            grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
+            gap: 12px;
+            margin-bottom: 20px;
         }
 
-        .competitor-item {
-            background: rgba(255, 255, 255, 0.06);
-            border: 1px solid rgba(255, 255, 255, 0.12);
-            border-radius: var(--radius-md);
-            padding: var(--space-5);
-            transition: all var(--transition-base);
-            cursor: pointer;
+        .stat-tile {
+            background: var(--bg-elevated);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 14px;
+            text-align: center;
         }
 
-        .competitor-item:hover {
-            background: rgba(255, 255, 255, 0.1);
-            transform: translateY(-3px);
-            box-shadow: var(--shadow-md);
+        .stat-tile .label {
+            font-size: 0.78rem;
+            color: var(--text-muted);
+            margin-bottom: 4px;
         }
 
-        .competitor-item input[type="checkbox"] {
-            margin-right: var(--space-3);
-            accent-color: var(--primary-color);
-            width: 20px;
-            height: 20px;
-            cursor: pointer;
+        .stat-tile .value {
+            font-size: 1.3rem;
+            font-weight: 700;
+            color: var(--text);
         }
 
-        .competitor-item label {
-            display: inline;
-            margin: 0;
-            cursor: pointer;
+        /* ===== Profile Section ===== */
+        .profile-section {
+            padding: 16px;
+            background: var(--bg-elevated);
+            border-radius: 12px;
+            margin-bottom: 14px;
+        }
+
+        .profile-section h3 {
+            font-size: 0.85rem;
+            font-weight: 600;
+            color: var(--primary);
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            margin-bottom: 10px;
+        }
+
+        .profile-row {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 6px;
+        }
+
+        .profile-row .field {
+            color: var(--text-muted);
+            min-width: 140px;
             font-weight: 500;
         }
 
-        .insight-box {
-            background: linear-gradient(135deg, rgba(99, 102, 241, 0.15) 0%, rgba(139, 92, 246, 0.15) 100%);
-            border: 1px solid rgba(99, 102, 241, 0.3);
-            padding: var(--space-6);
-            border-radius: var(--radius-lg);
-            margin-bottom: var(--space-8);
-            box-shadow: var(--shadow-lg);
+        .profile-row .value {
+            color: var(--text);
         }
 
-        .insight-box h3 {
-            font-size: 1.4rem;
-            font-weight: 700;
-            margin-bottom: var(--space-5);
-            color: var(--primary-light);
+        .tag-list {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 6px;
+            margin-top: 4px;
         }
 
-        .insight-box p {
-            margin-bottom: var(--space-4);
-            line-height: 1.7;
+        .tag {
+            padding: 4px 12px;
+            background: var(--primary-soft);
+            color: var(--primary);
+            border-radius: 999px;
+            font-size: 0.82rem;
+            font-weight: 500;
+        }
+
+        .insight-text {
             color: var(--text-secondary);
+            line-height: 1.7;
         }
 
-        .insight-box ul {
+        .rec-list {
             list-style: none;
-            padding-left: 0;
+            padding: 0;
         }
 
-        .insight-box li {
-            padding: var(--space-3) 0;
-            padding-left: var(--space-6);
+        .rec-list li {
+            padding: 10px 0;
+            padding-left: 28px;
             position: relative;
             color: var(--text-secondary);
             line-height: 1.6;
+            border-bottom: 1px solid var(--border);
         }
 
-        .insight-box li::before {
-            content: '✦';
+        .rec-list li:last-child { border-bottom: none; }
+
+        .rec-list li::before {
+            content: '→';
             position: absolute;
             left: 0;
-            color: var(--primary-light);
-            font-size: 1.2rem;
-        }
-
-        .content-results {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
-            gap: var(--space-6);
-            margin-top: var(--space-6);
-        }
-
-        .content-column {
-            background: rgba(255, 255, 255, 0.04);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            border-radius: var(--radius-lg);
-            padding: var(--space-6);
-            transition: all var(--transition-base);
-        }
-
-        .content-column:hover {
-            transform: translateY(-4px);
-            box-shadow: var(--shadow-xl);
-        }
-
-        .content-column h3 {
-            margin: 0 0 var(--space-5) 0;
-            font-size: 1.3rem;
+            top: 10px;
+            color: var(--primary);
             font-weight: 700;
-            color: var(--primary-light);
-            padding-bottom: var(--space-4);
-            border-bottom: 2px solid rgba(99, 102, 241, 0.3);
         }
 
-        .content-item {
-            margin-bottom: var(--space-4);
-            padding: var(--space-5);
-            background: rgba(255, 255, 255, 0.04);
-            border-radius: var(--radius-md);
-            transition: all var(--transition-base);
-            border: 1px solid rgba(255, 255, 255, 0.06);
+        .rec-list li.tip::before { content: '⚡'; }
+
+        /* ===== Competitors ===== */
+        .competitor-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+            gap: 12px;
         }
 
-        .content-item:hover {
-            background: rgba(255, 255, 255, 0.08);
-            transform: translateX(4px);
+        .competitor-card {
+            padding: 14px;
+            background: var(--bg-elevated);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            cursor: pointer;
+            transition: all 0.2s;
         }
 
-        .content-item a {
-            color: var(--primary-light);
-            text-decoration: none;
+        .competitor-card:hover {
+            border-color: var(--primary);
+            background: var(--primary-soft);
+        }
+
+        .competitor-card input[type="checkbox"] {
+            accent-color: var(--primary);
+            width: 18px;
+            height: 18px;
+            margin-bottom: 8px;
+            cursor: pointer;
+        }
+
+        .competitor-card .comp-name {
             font-weight: 600;
-            font-size: 1rem;
-            display: block;
-            margin-bottom: var(--space-2);
-            transition: color var(--transition-fast);
+            color: var(--text);
+            margin-bottom: 4px;
         }
 
-       .content-item a:hover {
-            color: var(--accent-color);
-        }
-
-        .content-item p {
-            margin: var(--space-1) 0;
+        .competitor-card .comp-note {
+            font-size: 0.82rem;
             color: var(--text-muted);
+        }
+
+        /* ===== Topic Search ===== */
+        .topic-search-bar {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 20px;
+        }
+
+        .topic-search-bar input {
+            flex: 1;
+            padding: 12px 16px;
+            background: var(--bg-input);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            color: var(--text);
+            font-size: 0.95rem;
+            outline: none;
+            transition: border-color 0.2s;
+            font-family: inherit;
+        }
+
+        .topic-search-bar input:focus {
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px var(--primary-soft);
+        }
+
+        .topic-search-bar button {
+            padding: 10px 20px;
+            background: var(--gradient);
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-weight: 600;
+            cursor: pointer;
+            font-family: inherit;
+            transition: opacity 0.2s;
+        }
+
+        .topic-search-bar button:hover { opacity: 0.9; }
+        .topic-search-bar button:disabled { opacity: 0.5; cursor: not-allowed; }
+
+        /* ===== Insight Box ===== */
+        .insight-card {
+            background: var(--primary-soft);
+            border: 1px solid var(--primary);
+            border-radius: 14px;
+            padding: 20px;
+            margin-bottom: 24px;
+        }
+
+        .insight-card h3 {
+            font-size: 1rem;
+            font-weight: 600;
+            color: var(--primary);
+            margin-bottom: 12px;
+        }
+
+        .insight-card .summary {
+            color: var(--text-secondary);
+            margin-bottom: 14px;
+            line-height: 1.7;
+        }
+
+        .insight-card .angles {
+            list-style: none;
+            padding: 0;
+        }
+
+        .insight-card .angles li {
+            padding: 10px 0 10px 24px;
+            position: relative;
+            color: var(--text-secondary);
+            border-bottom: 1px solid var(--border);
+            line-height: 1.6;
+        }
+
+        .insight-card .angles li:last-child { border-bottom: none; }
+        .insight-card .angles li::before {
+            content: '💡';
+            position: absolute;
+            left: 0;
+            top: 10px;
+        }
+
+        .insight-card .gap {
+            margin-top: 12px;
+            padding: 12px;
+            background: rgba(245, 158, 11, 0.1);
+            border: 1px solid rgba(245, 158, 11, 0.3);
+            border-radius: 10px;
+            color: var(--text-secondary);
             font-size: 0.9rem;
         }
 
-        @keyframes fadeInDown {
-            from {
-                opacity: 0;
-                transform: translateY(-20px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
+        /* ===== Content Tabs ===== */
+        .content-tabs {
+            display: flex;
+            gap: 4px;
+            margin-bottom: 20px;
+            border-bottom: 1px solid var(--border);
+            padding-bottom: 0;
         }
 
-        @keyframes fadeInUp {
-            from {
-                opacity: 0;
-                transform: translateY(20px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
+        .content-tab {
+            padding: 10px 20px;
+            background: none;
+            border: none;
+            border-bottom: 2px solid transparent;
+            color: var(--text-muted);
+            font-size: 0.9rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+            font-family: inherit;
+            display: flex;
+            align-items: center;
+            gap: 6px;
         }
+
+        .content-tab:hover { color: var(--text-secondary); }
+        .content-tab.active {
+            color: var(--primary);
+            border-bottom-color: var(--primary);
+        }
+
+        .tab-count {
+            padding: 2px 8px;
+            background: var(--primary-soft);
+            color: var(--primary);
+            border-radius: 999px;
+            font-size: 0.75rem;
+            font-weight: 700;
+        }
+
+        .tab-panel { display: none; }
+        .tab-panel.active { display: block; animation: fadeIn 0.3s ease-out; }
+
+        /* ===== Content Cards ===== */
+        .content-list {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .content-item {
+            display: flex;
+            gap: 12px;
+            padding: 14px;
+            background: var(--bg-elevated);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            text-decoration: none;
+            transition: all 0.2s;
+        }
+
+        .content-item:hover {
+            border-color: var(--border-hover);
+            box-shadow: var(--shadow-hover);
+            transform: translateY(-1px);
+        }
+
+        .content-item .platform-badge {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-width: 40px;
+            height: 40px;
+            border-radius: 10px;
+            font-size: 1.2rem;
+            font-weight: 700;
+        }
+
+        .content-item .platform-badge.youtube {
+            background: rgba(255, 0, 0, 0.1);
+            color: #ff0000;
+        }
+
+        .content-item .platform-badge.reddit {
+            background: rgba(255, 69, 0, 0.1);
+            color: #ff4500;
+        }
+
+        .content-item .content-info {
+            flex: 1;
+            min-width: 0;
+        }
+
+        .content-item .content-title {
+            font-weight: 600;
+            color: var(--text);
+            margin-bottom: 4px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+        .content-item .content-meta {
+            display: flex;
+            gap: 12px;
+            font-size: 0.82rem;
+            color: var(--text-muted);
+        }
+
+        .content-item .content-meta span {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 40px 20px;
+            color: var(--text-muted);
+        }
+
+        .empty-state .emoji {
+            font-size: 2rem;
+            margin-bottom: 8px;
+            opacity: 0.5;
+        }
+
+        /* ===== Skeleton Loading ===== */
+        .skeleton-card {
+            padding: 20px;
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            margin-bottom: 16px;
+        }
+
+        .skeleton-line {
+            height: 14px;
+            background: var(--skeleton);
+            border-radius: 6px;
+            margin-bottom: 8px;
+            animation: pulse 1.5s ease-in-out infinite;
+        }
+
+        .skeleton-line.short { width: 40%; }
+        .skeleton-line.medium { width: 70%; }
+        .skeleton-line.long { width: 100%; }
 
         @keyframes pulse {
-            0%, 100% {
-                opacity: 1;
-            }
-            50% {
-                opacity: 0.6;
-            }
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.4; }
         }
 
-        @keyframes shimmer {
-            0% {
-                background-position: -200% 0;
-            }
-            100% {
-                background-position: 200% 0;
-            }
-        }
+        /* ===== Hidden Sections ===== */
+        .hidden { display: none !important; }
 
-        /* Responsive Design */
-        @media (max-width: 1024px) {
-            .content-results {
-                grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-            }
-        }
-
-        @media (max-width: 768px) {
-            body {
-                padding: var(--space-4);
-            }
-
-            .container {
-                padding: 0;
-            }
-
-            .header {
-                padding: var(--space-8) 0;
-            }
-
-            .section {
-                padding: var(--space-6);
-                border-radius: var(--radius-lg);
-            }
-
-            .content-results {
-                grid-template-columns: 1fr;
-                gap: var(--space-4);
-            }
-
-            .competitor-list {
-                grid-template-columns: 1fr;
-            }
-
-            button {
-                width: 100%;
-            }
-        }
-
-        @media (max-width: 480px) {
-            .section {
-                padding: var(--space-5);
-            }
-
-            #profile-output {
-                padding: var(--space-5);
-            }
-
-            .content-column {
-                padding: var(--space-5);
-            }
-        }
-
-        /* Accessibility Improvements */
-        @media (prefers-reduced-motion: reduce) {
-            * {
-                animation-duration: 0.01ms !important;
-                animation-iteration-count: 1 !important;
-                transition-duration: 0.01ms !important;
-            }
-        }
-
-        /* Focus styles for keyboard navigation */
-        button:focus-visible,
-        input:focus-visible,
-        .competitor-item input:focus-visible {
-            outline: 2px solid var(--primary-color);
-            outline-offset: 2px;
-        }
-
-        /* High contrast mode support */
-        @media (prefers-contrast: high) {
-            .section {
-                border: 2px solid var(--text-primary);
-            }
-
-            button {
-                border: 2px solid var(--text-primary);
-            }
+        /* ===== Responsive ===== */
+        @media (max-width: 640px) {
+            .main { padding: 16px; }
+            .hero h1 { font-size: 1.8rem; }
+            .hero p { font-size: 1rem; }
+            .stats-grid { grid-template-columns: repeat(2, 1fr); }
+            .topic-search-bar { flex-direction: column; }
+            .search-btn { width: 100%; }
+            .content-tab { padding: 8px 12px; font-size: 0.82rem; }
         }
     </style>
 </head>
 <body>
-    <div class="container">
-        <div class="header">
+    <!-- Top Bar -->
+    <div class="topbar">
+        <a href="/" class="topbar-logo">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <circle cx="12" cy="12" r="10"/>
+                <polygon points="16.24 7.76 14.12 14.12 7.76 16.24 9.88 9.88 16.24 7.76"/>
+            </svg>
+            Creator Content Radar
+        </a>
+        <div class="topbar-actions">
+            <button class="theme-toggle" onclick="toggleTheme()" title="Toggle theme">
+                <svg class="moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>
+                </svg>
+                <svg class="sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <circle cx="12" cy="12" r="5"/>
+                    <line x1="12" y1="1" x2="12" y2="3"/>
+                    <line x1="12" y1="21" x2="12" y2="23"/>
+                    <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/>
+                    <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/>
+                    <line x1="1" y1="12" x2="3" y2="12"/>
+                    <line x1="21" y1="12" x2="23" y2="12"/>
+                    <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/>
+                    <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/>
+                </svg>
+            </button>
+        </div>
+    </div>
+
+    <div class="main">
+        <!-- Hero -->
+        <div class="hero">
             <h1>Creator Content Radar</h1>
-            <p>AI-Powered YouTube Channel Analysis & Content Discovery</p>
+            <p>AI-powered YouTube channel analysis & content discovery</p>
         </div>
 
-        <section class="section" id="section-analyze-channel">
-            <h2>🎯 Analyze YouTube Channel</h2>
-            <form id="analyze-form">
-                <div class="input-group">
-                    <label for="channel-url">YouTube Channel URL or ID</label>
-                    <input type="text" id="channel-url" placeholder="https://www.youtube.com/channel/UC... or @handle" required>
-                </div>
-                <button type="submit">Analyze Channel</button>
-                <span id="analyze-loading" class="loading-indicator">Analyzing channel...</span>
-                <div id="analyze-error" class="error-message"></div>
-            </form>
-            <div id="profile-output"></div>
-        </section>
+        <!-- Search Bar -->
+        <div class="search-bar">
+            <div class="search-input-wrapper">
+                <input type="text" id="channel-url" class="search-input"
+                    placeholder="Paste a YouTube channel URL or @handle..."
+                    onkeydown="if(event.key==='Enter')analyzeChannel()">
+                <button class="search-btn" id="analyze-btn" onclick="analyzeChannel()">Analyze</button>
+            </div>
+            <div class="loading-bar" id="analyze-loading"></div>
+            <div class="error-msg" id="analyze-error"></div>
+        </div>
 
-        <section class="section" id="section-find-competitors" style="display: none;">
-            <h2>🔍 Find Competitors</h2>
-            <p style="color: rgba(255, 255, 255, 0.7); margin-bottom: 20px;">Select competitors to include in your topic search:</p>
-            <div id="competitors-loading" class="loading-indicator">Finding competitors...</div>
-            <div id="competitors-error" class="error-message"></div>
-            <div id="competitors-output" class="competitor-list"></div>
-        </section>
-
-        <section class="section" id="section-search-topic" style="display: none;">
-            <h2>🚀 Search Topic</h2>
-            <form id="search-form">
-                <div class="input-group">
-                    <label for="search-topic">Topic to Search</label>
-                    <input type="text" id="search-topic" placeholder="e.g., 'video editing tips'" required>
-                </div>
-                <button type="submit">Search Content</button>
-                <span id="search-loading" class="loading-indicator">Searching content...</span>
-                <div id="search-error" class="error-message"></div>
-            </form>
-            <div id="search-results-output"></div>
-        </section>
+        <!-- Results Container -->
+        <div id="results"></div>
     </div>
 
     <script>
         let currentChannelId = null;
+        let lastResults = [];
 
-        function setLoading(elementId, isLoading, errorMessage = '') {
-            document.getElementById(elementId + '-loading').style.display = isLoading ? 'inline' : 'none';
-            document.getElementById(elementId + '-error').textContent = errorMessage;
-            document.getElementById(elementId + '-error').style.display = errorMessage ? 'block' : 'none';
+        // ===== Theme =====
+        function toggleTheme() {
+            const root = document.documentElement;
+            const current = root.getAttribute('data-theme');
+            const next = current === 'dark' ? 'light' : 'dark';
+            root.setAttribute('data-theme', next);
+            localStorage.setItem('theme', next);
         }
 
-        document.getElementById('analyze-form').addEventListener('submit', async (event) => {
-            event.preventDefault();
-            const channelUrl = document.getElementById('channel-url').value;
+        (function() {
+            const saved = localStorage.getItem('theme') || 'dark';
+            document.documentElement.setAttribute('data-theme', saved);
+        })();
+
+        // ===== Helpers =====
+        function setLoading(id, isLoading, error = '') {
+            const loadingBar = document.getElementById(id + '-loading');
+            const errorDiv = document.getElementById(id + '-error');
+            if (loadingBar) loadingBar.classList.toggle('active', isLoading);
+            if (errorDiv) {
+                errorDiv.textContent = error;
+                errorDiv.style.display = error ? 'block' : 'none';
+            }
+        }
+
+        function formatNumber(n) {
+            if (n >= 1e6) return (n / 1e6).toFixed(1) + 'M';
+            if (n >= 1e3) return (n / 1e3).toFixed(1) + 'K';
+            return n.toString();
+        }
+
+        function skeletonCards(count = 2) {
+            let html = '';
+            for (let i = 0; i < count; i++) {
+                html += `<div class="skeleton-card">
+                    <div class="skeleton-line medium"></div>
+                    <div class="skeleton-line long"></div>
+                    <div class="skeleton-line long"></div>
+                    <div class="skeleton-line short"></div>
+                </div>`;
+            }
+            return html;
+        }
+
+        // ===== Analyze Channel =====
+        async function analyzeChannel() {
+            const url = document.getElementById('channel-url').value.trim();
+            if (!url) return;
+
+            const btn = document.getElementById('analyze-btn');
+            btn.disabled = true;
             setLoading('analyze', true);
 
+            document.getElementById('results').innerHTML = skeletonCards(3);
+
             try {
-                const response = await fetch('/analyze-channel', {
+                const res = await fetch('/analyze-channel', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ channel_url: channelUrl })
+                    body: JSON.stringify({ channel_url: url })
                 });
-                const data = await response.json();
+                const data = await res.json();
 
-                if (response.ok) {
+                if (res.ok) {
                     currentChannelId = data.channel_id;
-                    document.getElementById('profile-output').innerHTML = `
-                        <h3>📊 Channel Profile: ${data.title}</h3>
-                        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; margin: 20px 0;">
-                            <div style="background: rgba(102, 126, 234, 0.15); padding: 15px; border-radius: 10px; text-align: center;">
-                                <div style="font-size: 0.9rem; color: rgba(255,255,255,0.7);">👥 Subscribers</div>
-                                <div style="font-size: 1.3rem; font-weight: 700; color: #667eea;">${data.subscriber_count.toLocaleString()}</div>
-                            </div>
-                            <div style="background: rgba(118, 75, 162, 0.15); padding: 15px; border-radius: 10px; text-align: center;">
-                                <div style="font-size: 0.9rem; color: rgba(255,255,255,0.7);">📺 Total Videos</div>
-                                <div style="font-size: 1.3rem; font-weight: 700; color: #764ba2;">${data.video_count.toLocaleString()}</div>
-                            </div>
-                            <div style="background: rgba(102, 126, 234, 0.15); padding: 15px; border-radius: 10px; text-align: center;">
-                                <div style="font-size: 0.9rem; color: rgba(255,255,255,0.7);">👁️ Total Views</div>
-                                <div style="font-size: 1.3rem; font-weight: 700; color: #667eea;">${data.view_count.toLocaleString()}</div>
-                            </div>
-                            <div style="background: rgba(118, 75, 162, 0.15); padding: 15px; border-radius: 10px; text-align: center;">
-                                <div style="font-size: 0.9rem; color: rgba(255,255,255,0.7);">📈 Avg Views/Video</div>
-                                <div style="font-size: 1.3rem; font-weight: 700; color: #764ba2;">${data.average_views_per_video.toLocaleString()}</div>
-                            </div>
-                            <div style="background: rgba(102, 126, 234, 0.15); padding: 15px; border-radius: 10px; text-align: center;">
-                                <div style="font-size: 0.9rem; color: rgba(255,255,255,0.7);">💬 Engagement Rate</div>
-                                <div style="font-size: 1.3rem; font-weight: 700; color: #667eea;">${data.engagement_rate.toFixed(2)}%</div>
-                            </div>
-                            <div style="background: rgba(118, 75, 162, 0.15); padding: 15px; border-radius: 10px; text-align: center;">
-                                <div style="font-size: 0.9rem; color: rgba(255,255,255,0.7);">🏆 Channel Tier</div>
-                                <div style="font-size: 1.3rem; font-weight: 700; color: #764ba2;">${data.channel_tier}</div>
-                            </div>
-                        </div>
-                        <div style="background: rgba(255,255,255,0.05); padding: 20px; border-radius: 12px; margin-bottom: 15px;">
-                            <h4 style="color: #667eea; margin-bottom: 15px;">🎯 Channel Analysis</h4>
-                            <p><strong>Niche:</strong> ${data.niche}</p>
-                            <p><strong>Topics:</strong> ${data.topics.join(', ')}</p>
-                            <p><strong>Content Style:</strong> ${data.content_style}</p>
-                            <p><strong>Target Audience:</strong> ${data.target_audience}</p>
-                            <p><strong>Upload Frequency:</strong> ${data.upload_frequency}</p>
-                            <p><strong>Growth Potential:</strong> ${data.growth_potential}</p>
-                        </div>
-                        <div style="background: rgba(255,255,255,0.05); padding: 20px; border-radius: 12px; margin-bottom: 15px;">
-                            <h4 style="color: #764ba2; margin-bottom: 15px;">🤖 AI Summary</h4>
-                            <p>${data.ai_summary}</p>
-                        </div>
-                        <div style="background: rgba(102, 126, 234, 0.1); padding: 20px; border-radius: 12px; margin-bottom: 15px;">
-                            <h4 style="color: #667eea; margin-bottom: 15px;">💡 Content Recommendations</h4>
-                            <ul style="list-style: none; padding: 0;">
-                                ${data.content_recommendations.map(rec => `<li style="padding: 8px 0; padding-left: 25px; position: relative;">✨ ${rec}</li>`).join('')}
-                            </ul>
-                        </div>
-                        <div style="background: rgba(118, 75, 162, 0.1); padding: 20px; border-radius: 12px;">
-                            <h4 style="color: #764ba2; margin-bottom: 15px;">🚀 Optimization Tips</h4>
-                            <ul style="list-style: none; padding: 0;">
-                                ${data.optimization_tips.map(tip => `<li style="padding: 8px 0; padding-left: 25px; position: relative;">⚡ ${tip}</li>`).join('')}
-                            </ul>
-                        </div>
-                    `;
-                    document.getElementById('section-find-competitors').style.display = 'block';
+                    renderProfile(data);
+                    setLoading('analyze', false);
                     findCompetitors(currentChannelId);
                 } else {
-                    setLoading('analyze', false, data.detail || 'An unknown error occurred.');
+                    setLoading('analyze', false, data.detail || 'Analysis failed. Check your URL and try again.');
+                    document.getElementById('results').innerHTML = '';
                 }
-            } catch (error) {
-                setLoading('analyze', false, 'Network error or server unreachable.');
-                console.error('Analyze channel error:', error);
+            } catch (err) {
+                setLoading('analyze', false, 'Network error — is the server running?');
+                document.getElementById('results').innerHTML = '';
             } finally {
-                setLoading('analyze', false);
+                btn.disabled = false;
             }
-        });
+        }
 
+        function renderProfile(data) {
+            document.getElementById('results').innerHTML = `
+                <!-- Channel Profile Card -->
+                <div class="card">
+                    <div class="card-header">
+                        <div class="icon-badge">📊</div>
+                        <h2>${data.title}</h2>
+                    </div>
+                    <div class="stats-grid">
+                        <div class="stat-tile"><div class="label">Subscribers</div><div class="value">${formatNumber(data.subscriber_count)}</div></div>
+                        <div class="stat-tile"><div class="label">Total Videos</div><div class="value">${formatNumber(data.video_count)}</div></div>
+                        <div class="stat-tile"><div class="label">Total Views</div><div class="value">${formatNumber(data.view_count)}</div></div>
+                        <div class="stat-tile"><div class="label">Avg Views/Video</div><div class="value">${formatNumber(Math.round(data.average_views_per_video))}</div></div>
+                        <div class="stat-tile"><div class="label">Engagement</div><div class="value">${data.engagement_rate.toFixed(2)}%</div></div>
+                        <div class="stat-tile"><div class="label">Tier</div><div class="value">${data.channel_tier}</div></div>
+                    </div>
+
+                    <div class="profile-section">
+                        <h3>🎯 Channel Analysis</h3>
+                        <div class="profile-row"><span class="field">Niche</span><span class="value">${data.niche || '—'}</span></div>
+                        <div class="profile-row"><span class="field">Content Style</span><span class="value">${data.content_style || '—'}</span></div>
+                        <div class="profile-row"><span class="field">Target Audience</span><span class="value">${data.target_audience || '—'}</span></div>
+                        <div class="profile-row"><span class="field">Upload Frequency</span><span class="value">${data.upload_frequency || '—'}</span></div>
+                        <div class="profile-row"><span class="field">Growth Potential</span><span class="value">${data.growth_potential || '—'}</span></div>
+                        <div style="margin-top:8px;"><strong style="color:var(--text-muted);font-size:0.85rem;">Topics:</strong></div>
+                        <div class="tag-list">${(data.topics || []).map(t => `<span class="tag">${t}</span>`).join('')}</div>
+                    </div>
+
+                    <div class="profile-section">
+                        <h3>🤖 AI Summary</h3>
+                        <p class="insight-text">${data.ai_summary || 'No summary available.'}</p>
+                    </div>
+
+                    ${data.content_recommendations && data.content_recommendations.length > 0 ? `
+                    <div class="profile-section">
+                        <h3>💡 Content Recommendations</h3>
+                        <ul class="rec-list">
+                            ${data.content_recommendations.map(rec => `<li>${rec}</li>`).join('')}
+                        </ul>
+                    </div>` : ''}
+
+                    ${data.optimization_tips && data.optimization_tips.length > 0 ? `
+                    <div class="profile-section">
+                        <h3>⚡ Optimization Tips</h3>
+                        <ul class="rec-list">
+                            ${data.optimization_tips.map(tip => `<li class="tip">${tip}</li>`).join('')}
+                        </ul>
+                    </div>` : ''}
+                </div>
+
+                <!-- Competitors placeholder -->
+                <div class="card" id="competitors-card">
+                    <div class="card-header">
+                        <div class="icon-badge">🔍</div>
+                        <h2>Find Competitors</h2>
+                    </div>
+                    <div id="competitors-loading-bar" class="loading-bar active"></div>
+                    <div id="competitors-output"></div>
+                    <div class="error-msg" id="comp-error"></div>
+                </div>
+
+                <!-- Topic Search placeholder -->
+                <div class="card hidden" id="topic-card">
+                    <div class="card-header">
+                        <div class="icon-badge">🚀</div>
+                        <h2>Search Topics</h2>
+                    </div>
+                    <div class="topic-search-bar">
+                        <input type="text" id="topic-input" placeholder="e.g., 'budget laptops 2025' or 'AI tools for creators'"
+                            onkeydown="if(event.key==='Enter')searchTopic()">
+                        <button id="topic-btn" onclick="searchTopic()">Search</button>
+                    </div>
+                    <div class="loading-bar" id="topic-loading"></div>
+                    <div class="error-msg" id="topic-error"></div>
+                    <div id="topic-results"></div>
+                </div>
+            `;
+        }
+
+        // ===== Find Competitors =====
         async function findCompetitors(channelId) {
-            setLoading('competitors', true);
-            document.getElementById('competitors-output').innerHTML = '';
-
             try {
-                const response = await fetch('/find-competitors', {
+                const res = await fetch('/find-competitors', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ channel_id: channelId })
                 });
-                const data = await response.json();
+                const data = await res.json();
 
-                if (response.ok) {
-                    if (data.length > 0) {
-                        const competitorListHtml = data.map(comp => `
-                            <div class="competitor-item">
-                                <input type="checkbox" class="competitor-checkbox" value="${comp.channel_id}" checked>
-                                <label>${comp.title}</label>
-                                <p style="margin: 5px 0 0 0; color: rgba(255,255,255,0.6); font-size: 0.85rem;">${comp.relevance_note}</p>
-                            </div>
-                        `).join('');
-                        document.getElementById('competitors-output').innerHTML = competitorListHtml;
-                        document.getElementById('section-search-topic').style.display = 'block';
-                    } else {
-                        document.getElementById('competitors-output').innerHTML = '<p style="color: rgba(255,255,255,0.7);">No competitors found.</p>';
-                    }
+                const loadingBar = document.getElementById('competitors-loading-bar');
+                if (loadingBar) loadingBar.classList.remove('active');
+
+                if (res.ok && data.length > 0) {
+                    document.getElementById('competitors-output').innerHTML = `
+                        <p style="color:var(--text-muted);margin-bottom:12px;font-size:0.9rem;">Select competitors to include in topic search:</p>
+                        <div class="competitor-grid">
+                            ${data.map(c => `
+                                <div class="competitor-card" onclick="this.querySelector('input').click()">
+                                    <input type="checkbox" class="comp-cb" value="${c.channel_id}" checked>
+                                    <div class="comp-name">${c.title}</div>
+                                    <div class="comp-note">${c.relevance_note || ''}</div>
+                                </div>
+                            `).join('')}
+                        </div>
+                    `;
+                    document.getElementById('topic-card').classList.remove('hidden');
                 } else {
-                    setLoading('competitors', false, data.detail || 'An unknown error occurred.');
+                    document.getElementById('competitors-output').innerHTML = `
+                        <p style="color:var(--text-muted);">No competitors found. You can still search topics below.</p>
+                    `;
+                    document.getElementById('topic-card').classList.remove('hidden');
                 }
-            } catch (error) {
-                setLoading('competitors', false, 'Network error or server unreachable.');
-                console.error('Find competitors error:', error);
-            } finally {
-                setLoading('competitors', false);
+            } catch (err) {
+                const loadingBar = document.getElementById('competitors-loading-bar');
+                if (loadingBar) loadingBar.classList.remove('active');
+                document.getElementById('comp-error').textContent = 'Failed to load competitors.';
+                document.getElementById('comp-error').style.display = 'block';
+                document.getElementById('topic-card').classList.remove('hidden');
             }
         }
 
-        document.getElementById('search-form').addEventListener('submit', async (event) => {
-            event.preventDefault();
-            const topic = document.getElementById('search-topic').value;
-            const selectedCompetitors = Array.from(document.querySelectorAll('.competitor-checkbox:checked'))
-                                            .map(cb => cb.value);
-            setLoading('search', true);
-            document.getElementById('search-results-output').innerHTML = '';
+        // ===== Search Topic =====
+        async function searchTopic() {
+            const topic = document.getElementById('topic-input').value.trim();
+            if (!topic || !currentChannelId) return;
+
+            const btn = document.getElementById('topic-btn');
+            btn.disabled = true;
+            setLoading('topic', true);
+
+            const selectedComps = Array.from(document.querySelectorAll('.comp-cb:checked')).map(cb => cb.value);
+
+            document.getElementById('topic-results').innerHTML = skeletonCards(2);
 
             try {
-                const response = await fetch('/search-topic', {
+                const res = await fetch('/search-topic', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({
                         channel_id: currentChannelId,
                         topic: topic,
-                        competitor_channel_ids: selectedCompetitors
+                        competitor_channel_ids: selectedComps
                     })
                 });
-                const data = await response.json();
+                const data = await res.json();
 
-                if (response.ok) {
-                    const insight = data.insight;
-                    const results = data.results;
-
-                    let outputHtml = `
-                        <div class="insight-box">
-                            <h3>💡 AI Insight for '${topic}'</h3>
-                            <p><strong>📋 Summary:</strong> ${insight.summary}</p>
-                            <p><strong>🎯 Content Angles:</strong></p>
-                            <ul>
-                                ${insight.content_angles.map(angle => `<li>${angle}</li>`).join('')}
-                            </ul>
-                            ${insight.content_gap ? `<p><strong>🔍 Content Gap:</strong> ${insight.content_gap}</p>` : ''}
-                        </div>
-                        <h3 style="font-size: 1.5rem; font-weight: 700; margin-bottom: 20px; color: #667eea;">📺 Content Results</h3>
-                        <div class="content-results">
-                    `;
-
-                    const groupedResults = {
-                        trending: [],
-                        popular: [],
-                        underrated: []
-                    };
-
-                    results.forEach(item => {
-                        if (groupedResults[item.classification]) {
-                            groupedResults[item.classification].push(item);
-                        }
-                    });
-
-                    for (const classification in groupedResults) {
-                        const title = classification.charAt(0).toUpperCase() + classification.slice(1);
-                        const emoji = classification === 'trending' ? '🔥' : classification === 'popular' ? '⭐' : '💎';
-                        outputHtml += `
-                            <div class="content-column">
-                                <h3>${emoji} ${title}</h3>
-                                ${groupedResults[classification].length > 0 ?
-                                    groupedResults[classification].map(item => `
-                                        <div class="content-item">
-                                            <a href="${item.url}" target="_blank">${item.title}</a>
-                                            <p>📺 Source: ${item.source}</p>
-                                            <p>📊 Engagement: ${item.engagement_score.toFixed(2)}</p>
-                                        </div>
-                                    `).join('')
-                                    : '<p style="color: rgba(255,255,255,0.5);">No results for this category.</p>'
-                                }
-                            </div>
-                        `;
-                    }
-
-                    outputHtml += `</div>`;
-                    document.getElementById('search-results-output').innerHTML = outputHtml;
-
+                if (res.ok) {
+                    renderTopicResults(data, topic);
+                    setLoading('topic', false);
                 } else {
-                    setLoading('search', false, data.detail || 'An unknown error occurred.');
+                    setLoading('topic', false, data.detail || 'Search failed.');
+                    document.getElementById('topic-results').innerHTML = '';
                 }
-            } catch (error) {
-                setLoading('search', false, 'Network error or server unreachable.');
-                console.error('Search topic error:', error);
+            } catch (err) {
+                setLoading('topic', false, 'Network error — is the server running?');
+                document.getElementById('topic-results').innerHTML = '';
             } finally {
-                setLoading('search', false);
+                btn.disabled = false;
             }
-        });
+        }
+
+        function renderTopicResults(data, topic) {
+            const { insight, results } = data;
+            lastResults = results;
+
+            // Group by classification
+            const grouped = { trending: [], popular: [], underrated: [], none: [] };
+            results.forEach(r => {
+                const cls = r.classification || 'none';
+                if (!grouped[cls]) grouped[cls] = [];
+                grouped[cls].push(r);
+            });
+
+            const trendingCount = grouped.trending.length;
+            const popularCount = grouped.popular.length;
+            const underratedCount = grouped.underrated.length;
+
+            let html = '';
+
+            // Insight card
+            if (insight) {
+                html += `
+                    <div class="insight-card">
+                        <h3>💡 AI Insight: "${topic}"</h3>
+                        <p class="summary">${insight.summary || ''}</p>
+                        ${insight.content_angles && insight.content_angles.length > 0 ? `
+                            <ul class="angles">
+                                ${insight.content_angles.map(a => `<li>${a}</li>`).join('')}
+                            </ul>
+                        ` : ''}
+                        ${insight.content_gap ? `
+                            <div class="gap">🔍 <strong>Content Gap:</strong> ${insight.content_gap}</div>
+                        ` : ''}
+                    </div>
+                `;
+            }
+
+            // Tabs
+            html += `
+                <div class="content-tabs">
+                    <button class="content-tab active" onclick="switchTab('trending', this)">
+                        🔥 Trending <span class="tab-count">${trendingCount}</span>
+                    </button>
+                    <button class="content-tab" onclick="switchTab('popular', this)">
+                        ⭐ Popular <span class="tab-count">${popularCount}</span>
+                    </button>
+                    <button class="content-tab" onclick="switchTab('underrated', this)">
+                        💎 Underrated <span class="tab-count">${underratedCount}</span>
+                    </button>
+                    <button class="content-tab" onclick="switchTab('all', this)">
+                        📋 All <span class="tab-count">${results.length}</span>
+                    </button>
+                </div>
+            `;
+
+            // Tab panels
+            const renderItems = (items) => {
+                if (!items || items.length === 0) {
+                    return `<div class="empty-state"><div class="emoji">📭</div><p>No results in this category.</p></div>`;
+                }
+                return `<div class="content-list">${items.map(item => {
+                    const platformIcon = item.platform === 'youtube' ? '▶' : 'R';
+                    const metrics = item.raw_metrics || {};
+                    const views = metrics.views || metrics.upvotes || 0;
+                    const likes = metrics.likes || metrics.comments || 0;
+                    const platformLabel = item.platform === 'youtube' ? 'YouTube' : 'Reddit';
+                    return `
+                        <a href="${item.url}" target="_blank" class="content-item">
+                            <div class="platform-badge ${item.platform}">${platformIcon}</div>
+                            <div class="content-info">
+                                <div class="content-title">${item.title}</div>
+                                <div class="content-meta">
+                                    <span>📍 ${item.source || platformLabel}</span>
+                                    <span>📊 ${formatNumber(item.engagement_score)}</span>
+                                    ${views > 0 ? `<span>👁️ ${formatNumber(views)}</span>` : ''}
+                                    ${likes > 0 ? `<span>💬 ${formatNumber(likes)}</span>` : ''}
+                                </div>
+                            </div>
+                        </a>
+                    `;
+                }).join('')}</div>`;
+            };
+
+            html += `<div class="tab-panel active" id="panel-trending">${renderItems(grouped.trending)}</div>`;
+            html += `<div class="tab-panel" id="panel-popular">${renderItems(grouped.popular)}</div>`;
+            html += `<div class="tab-panel" id="panel-underrated">${renderItems(grouped.underrated)}</div>`;
+            html += `<div class="tab-panel" id="panel-all">${renderItems(results)}</div>`;
+
+            document.getElementById('topic-results').innerHTML = html;
+        }
+
+        function switchTab(tab, btn) {
+            document.querySelectorAll('.content-tab').forEach(t => t.classList.remove('active'));
+            document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+            btn.classList.add('active');
+            document.getElementById('panel-' + tab).classList.add('active');
+        }
     </script>
 </body>
 </html>
