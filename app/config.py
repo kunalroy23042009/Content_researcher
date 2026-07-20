@@ -7,6 +7,7 @@ Usage:
 """
 
 from pydantic_settings import BaseSettings, SettingsConfigDict
+from pydantic import field_validator
 
 
 class Settings(BaseSettings):
@@ -46,6 +47,19 @@ class Settings(BaseSettings):
 
     # App
     APP_URL: str = "http://localhost:8000"
+
+
+    @field_validator("YOUTUBE_API_KEY", "GEMINI_API_KEY", "GROQ_API_KEY", "OPENROUTER_API_KEY")
+    @classmethod
+    def strip_quotes(cls, v: str) -> str:
+        """Strip surrounding quotes that may come from env files."""
+        if isinstance(v, str):
+            v = v.strip()
+            if v.startswith('"') and v.endswith('"'):
+                v = v[1:-1]
+            if v.startswith("'") and v.endswith("'"):
+                v = v[1:-1]
+        return v
 
 
 # Singleton – import this everywhere
