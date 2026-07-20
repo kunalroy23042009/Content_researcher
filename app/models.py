@@ -12,6 +12,19 @@ from pydantic import BaseModel
 # Phase 4 — Channel analysis
 # ---------------------------------------------------------------------------
 
+class VideoPerformance(BaseModel):
+    """Performance data for a single video from the channel."""
+
+    title: str
+    video_id: str = ""
+    views: int = 0
+    likes: int = 0
+    comments: int = 0
+    published_at: str = ""
+    performance_ratio: float = 0.0  # views / channel_avg_views (1.0 = average)
+    duration_seconds: int = 0
+
+
 class ChannelProfile(BaseModel):
     """Structured profile of a YouTube channel produced by the analyzer."""
 
@@ -35,6 +48,13 @@ class ChannelProfile(BaseModel):
     growth_potential: str = ""
     content_recommendations: list[str] = []
     optimization_tips: list[str] = []
+    # Content-based analysis
+    top_performing_videos: list[VideoPerformance] = []
+    underperforming_videos: list[VideoPerformance] = []
+    title_patterns: list[str] = []  # patterns identified in best-performing titles
+    content_gaps: list[str] = []  # topics not covered but should be
+    best_topics: list[str] = []  # topics that drive the most engagement
+    posting_schedule: str = ""  # e.g., "Tuesdays and Fridays, 3pm EST"
 
 
 # ---------------------------------------------------------------------------

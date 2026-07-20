@@ -868,10 +868,51 @@
                         <div class="tag-list">${(data.topics || []).map(t => `<span class="tag">${t}</span>`).join('')}</div>
                     </div>
 
+                    ${data.best_topics && data.best_topics.length > 0 ? `
+                    <div class="profile-section">
+                        <h3>🏆 Best Performing Topics</h3>
+                        <div class="tag-list">${data.best_topics.map(t => `<span class="tag">${t}</span>`).join('')}</div>
+                    </div>` : ''}
+
+                    ${data.top_performing_videos && data.top_performing_videos.length > 0 ? `
+                    <div class="profile-section">
+                        <h3>📈 Top Performing Videos</h3>
+                        <div class="content-list">
+                            ${data.top_performing_videos.map(v => `
+                                <div class="content-item" style="cursor:default;">
+                                    <div class="platform-badge youtube" style="background:rgba(16,185,129,0.1);color:var(--success);">↑</div>
+                                    <div class="content-info">
+                                        <div class="content-title">${v.title}</div>
+                                        <div class="content-meta">
+                                            <span>👁️ ${formatNumber(v.views)}</span>
+                                            <span>👍 ${formatNumber(v.likes)}</span>
+                                            <span>💬 ${formatNumber(v.comments)}</span>
+                                            <span style="color:var(--success);font-weight:600;">${v.performance_ratio.toFixed(1)}x avg</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            `).join('')}
+                        </div>
+                    </div>` : ''}
+
+                    ${data.title_patterns && data.title_patterns.length > 0 ? `
+                    <div class="profile-section">
+                        <h3>📝 Title Patterns</h3>
+                        <div class="tag-list">${data.title_patterns.map(t => `<span class="tag">${t}</span>`).join('')}</div>
+                    </div>` : ''}
+
                     <div class="profile-section">
                         <h3>🤖 AI Summary</h3>
                         <p class="insight-text">${data.ai_summary || 'No summary available.'}</p>
                     </div>
+
+                    ${data.content_gaps && data.content_gaps.length > 0 ? `
+                    <div class="profile-section">
+                        <h3>🔍 Content Gaps</h3>
+                        <ul class="rec-list">
+                            ${data.content_gaps.map(gap => `<li>${gap}</li>`).join('')}
+                        </ul>
+                    </div>` : ''}
 
                     ${data.content_recommendations && data.content_recommendations.length > 0 ? `
                     <div class="profile-section">
