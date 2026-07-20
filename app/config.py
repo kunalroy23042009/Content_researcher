@@ -18,10 +18,10 @@ class Settings(BaseSettings):
     )
 
     YOUTUBE_API_KEY: str = ""
-    REDDIT_CLIENT_ID: str = ""
-    REDDIT_CLIENT_SECRET: str = ""
-    REDDIT_USER_AGENT: str = "creator-content-radar/0.1"
     GEMINI_API_KEY: str = ""
+    GROQ_API_KEY: str = ""
+    OPENROUTER_API_KEY: str = ""
+    AI_PROVIDER: str = "auto"  # auto, gemini, groq, openrouter
 
 
 # Singleton – import this everywhere
