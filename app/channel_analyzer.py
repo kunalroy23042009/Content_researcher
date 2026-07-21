@@ -55,7 +55,13 @@ def _extract_channel_identifier(url_or_id: str) -> tuple[str, str]:
 
 
 def _build_youtube_client():
-    return build("youtube", "v3", developerKey=settings.YOUTUBE_API_KEY)
+    """Build YouTube API client, raising a clear error if the API key is missing."""
+    if not settings.YOUTUBE_API_KEY:
+        raise ValueError(
+            "YOUTUBE_API_KEY is not set. "
+            "Add it as an environment variable in your Render dashboard → Environment tab."
+        )
+    return build("youtube", "v3", developerKey=settings.YOUTUBE_API_KEY, cache_discovery=False)
 
 
 def _iso_to_seconds(duration: str) -> int:

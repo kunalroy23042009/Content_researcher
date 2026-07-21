@@ -20,8 +20,8 @@ A tool where a YouTube creator pastes their channel URL to get AI-powered niche 
 
 ```bash
 # Clone
-git clone https://github.com/kunalroy23042009/Content_researcher.git
-cd Content_researcher
+git clone https://github.com/ajayraj14195-bit/creator-content-radar.git
+cd creator-content-radar
 
 # Install
 pip install -e ".[dev]"

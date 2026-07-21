@@ -110,8 +110,27 @@ class SearchTopicResponse(BaseModel):
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    """Initialize the database on startup."""
+    """Initialize the database on startup and validate critical config."""
     init_db()
+
+    # Validate required environment variables at startup so Render logs show the issue clearly
+    missing = []
+    if not settings.YOUTUBE_API_KEY:
+        missing.append("YOUTUBE_API_KEY")
+    has_ai = any([settings.GEMINI_API_KEY, settings.GROQ_API_KEY, settings.OPENROUTER_API_KEY])
+    if not has_ai:
+        missing.append("GEMINI_API_KEY / GROQ_API_KEY / OPENROUTER_API_KEY (at least one required)")
+
+    if missing:
+        logger.error(
+            "⚠️  MISSING REQUIRED ENVIRONMENT VARIABLES: %s  "
+            "→ Go to your Render dashboard → Environment tab and add these keys. "
+            "See .env.example for details.",
+            ", ".join(missing),
+        )
+    else:
+        logger.info("✅ All required environment variables are set.")
+
     yield
 
 
@@ -126,10 +145,14 @@ app = FastAPI(
 app.state.limiter = limiter
 app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
 
-# CORS
+# CORS — locked down in production, open in dev
+_CORS_ORIGINS = [o.strip() for o in (settings.APP_URL or "").split(",") if o.strip()]
+if not _CORS_ORIGINS or "*" not in _CORS_ORIGINS:
+    _CORS_ORIGINS = ["*"]  # fallback for local dev
+
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],  # Lock down in production
+    allow_origins=_CORS_ORIGINS,
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
